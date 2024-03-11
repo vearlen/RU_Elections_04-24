@@ -3,7 +3,7 @@ project:
   output-dir: docs
 
 website:
-  title: "RU_Elections_04-24"
+  title: "Russian elections'04-24"
   navbar:
     left:
       - href: index.qmd
