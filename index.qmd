@@ -189,4 +189,8 @@ g1 <- RU04_20_PM %>%
 g1
 ```
 
+# Данные
+
+Данные в формате [csv](https://github.com/vearlen/RU_Elections_04-24/raw/master/Data/RU04_20_Russia.csv "результаты выборов за границей")
+
 *Вопросы и предложения: ТГ @vearlen*
