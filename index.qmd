@@ -6,6 +6,10 @@ author: "Ilya Tishchenko"
 
 # Источник и сбор данных
 
+Явка в Австрии около 10%\[\^1\]
+
+\[\^1\]: https://www.integrationsfonds.at/fileadmin/user_upload/Fact_Sheet_41_Russische_Bevo\_\_lkerung_V3.pdf
+
 # Общие сведения
 
 ```{r}
