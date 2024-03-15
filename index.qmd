@@ -6,15 +6,15 @@ author: "Ilya Tishchenko"
 
 # Источник и сбор данных
 
-Данные собраны с сайта ЦИК[^1] [^2] [^3] [^4] (ссылки работают только с российского IP).
+Данные собраны с сайта ЦИК[^1] [^2] [^3] [^4] (ссылки работают только с российского IP). Всего за границей проживает в районе 679 028 человек. В Германии живет подавляющее большинство 237 816 (35%). Избирателей за рубежом ХХХХ, это ХХХ от всего процента избирателей.
 
-[^1]: [2004](http://www.foreign-countries.vybory.izbirkom.ru/region/region/foreign-countries?action=show&root=1&tvd=1001000981752&vrn=1001000882950&region=99&global=&sub_region=99&prver=0&pronetvd=null&cuiknum=null&&type=227)
+[^1]: выборы [2004](http://www.foreign-countries.vybory.izbirkom.ru/region/region/foreign-countries?action=show&root=1&tvd=1001000981752&vrn=1001000882950&region=99&global=&sub_region=99&prver=0&pronetvd=null&cuiknum=null&&type=227)
 
-[^2]: http://www.vybory.izbirkom.ru/region/region/izbirkom?action=show&root=1&tvd=100100022280270&vrn=100100022176412&region=0&global=&sub_region=0&prver=0&pronetvd=null&vibid=100100022280270&type=227
+[^2]: Выборы [2008](http://www.vybory.izbirkom.ru/region/region/izbirkom?action=show&root=1&tvd=100100022280270&vrn=100100022176412&region=0&global=&sub_region=0&prver=0&pronetvd=null&vibid=100100022280270&type=227)
 
-[^3]: http://www.vybory.izbirkom.ru/region/region/izbirkom?action=show&root=1&tvd=100100032124923&vrn=100100031793505&region=0&global=&sub_region=0&prver=0&pronetvd=null&vibid=100100032124923&type=227
+[^3]: Выборы [2012](http://www.vybory.izbirkom.ru/region/region/izbirkom?action=show&root=1&tvd=100100032124923&vrn=100100031793505&region=0&global=&sub_region=0&prver=0&pronetvd=null&vibid=100100032124923&type=227)
 
-[^4]: http://www.vybory.izbirkom.ru/region/region/izbirkom?action=show&root=1&tvd=100100084849217&vrn=100100084849062&region=0&global=&sub_region=0&prver=0&pronetvd=null&vibid=100100084849217&type=227
+[^4]: Выборы [2018](http://www.vybory.izbirkom.ru/region/region/izbirkom?action=show&root=1&tvd=100100084849217&vrn=100100084849062&region=0&global=&sub_region=0&prver=0&pronetvd=null&vibid=100100084849217&type=227)
 
 Явка в Австрии ±14%. На последние выборы президента в 2018 году в Вене пришло 2248 человека, в Австрии в 2018 году проживало 32429[^5] человека с российским гражданством из них примерно 50% живет в Вене.
 
@@ -202,9 +202,5 @@ g1 <- RU04_20_PM %>%
 
 g1
 ```
-
-# Данные
-
-Данные в формате [csv](https://github.com/vearlen/RU_Elections_04-24/raw/master/Data/RU04_20_Russia.csv "результаты выборов за границей")
 
 *Вопросы и предложения: ТГ @vearlen*
