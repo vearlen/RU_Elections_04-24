@@ -1,6 +1,7 @@
 project:
   type: website
   output-dir: docs
+
   
 
 website:
@@ -8,14 +9,16 @@ website:
   navbar:
     left:
       - href: index.qmd
-        text: Home
-      - about.qmd
+        text: Текст
+      - href: about.qmd
+        text: Карта
 
 format:
   html:
     theme: flatly
     css: styles.css
     toc: true
+    fontsize: 1em
   
 editor: visual
 
