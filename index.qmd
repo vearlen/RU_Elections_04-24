@@ -188,7 +188,7 @@ RU04_20_PM <-
   filter(str_detect(Label,'Пу|Ме|yes')) %>% 
   group_by(en_country,year,region) %>% 
   summarise(rat = mean(ratio)) %>% 
-  filter(region == "Europe") %>% 
+  filter(region == "Europe") %>%
   # distinct(en_country) %>% View()
   mutate(color = case_when(
     en_country == "Austria" ~ "red",
