@@ -42,8 +42,8 @@ g1 <- turnout18 %>%
   theme_cowplot() +
   labs(x = "", y = "Явка на выборах 2018")
 
-g1
-# ggplotly(g1,tooltip = 'text')
+# g1
+ggplotly(g1,tooltip = 'text')
 
 # fig <- plot_ly(turnout18,x=~vote_ratio,y=~reorder(en_country,-vote_ratio),type='bar',orientation='h')
 # fig
