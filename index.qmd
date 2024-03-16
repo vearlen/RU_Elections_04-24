@@ -21,6 +21,7 @@ library(tidyverse)
 library(plotly)
 library(cowplot)
 library(ggstar)
+library(DT)
 library('ggrepel')
 #ratio_all  <-  round(1890863/112309947*100,1)
 #ratio_eu <- round(679028/112309947*100,1)
@@ -106,7 +107,7 @@ g1 <- RU_cumsum %>%
       "<br>кол-во проголосовавших: ", cntr_total,
       "<br>от всех избирателей: ", round(ratio,0),"%",
       "<br>накопленный процент: ", round(cum_rat,0),"%",
-      "<br>общее кол-во проголосовавших/всего: ", cum_num," / ", total 
+      "<br>накопленное кол-во проголосовавших/всего: ", cum_num," / ", total 
     )))+
   geom_col(aes(y=ratio,x=reorder(en_country,-ratio)))+
   geom_line(aes(y=cum_rat,group=1,x=reorder(en_country,-ratio)))+
@@ -146,6 +147,20 @@ cum_75plot(el_year = 2018)
 
 ```{r 2020}
 cum_75plot(el_year = 2020)
+```
+
+В целом в любой год топ 5 стран дают почти 50% избирателей за рубежом и эти топ пять это:
+
+```{r}
+RU_cumsum %>% 
+  filter(index <=5) %>% 
+  select(en_country,year,cum_rat) %>% 
+  arrange(year,cum_rat) %>% 
+  select(-cum_rat) %>% 
+  pivot_wider(names_from = year,values_from = en_country) %>% 
+  unnest() %>% 
+  datatable(options = list(pageLength = 5, dom = 'tip'), rownames = FALSE)
+  
 ```
 
 # Как голосует Европа
