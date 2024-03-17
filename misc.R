@@ -1,3 +1,9 @@
+pu <- tibble(year=c(2004,2008,2012,2018,2020),
+             rat=c(71.3,70.28,63.6,76.7,78.45),
+             en_country = rep("Официальный результат 
+выборов в РФ",5)) %>% 
+  mutate(rat_dec = rat*0.01)
+
 RU04_20 %>% 
   filter(year == 2018,en_country == 'Latvia',
          Label=='Число действительных избирательных бюллетеней') %>% 
@@ -85,7 +91,132 @@ RU_cumsum %>%
 
 # all votes ---------------------------------------------------------------
 voters_total <- function(sel_region = NA, sel_country = NA){
+  
+  if(is.na(sel_region)){
+    sel_region = all_of(RU04_20$region)
+    sel_region_label = NULL
+  }  else {
+    sel_region
+    sel_region_label = sel_region
+  }
+  
+  if(is.na(sel_country)){
+    sel_country = all_of(RU04_20$en_country) 
+    sel_country_label = NULL
+  } else {
+    sel_country
+    sel_country_label = sel_country
+  }  
+  
+  total_voters <- RU04_20 %>% 
+    filter(region %in% c(sel_region)) %>% 
+    filter(en_country %in% c(sel_country)) %>%
+    filter(Label %in% c("Число недействительных избирательных бюллетеней",
+                        "Число действительных избирательных бюллетеней","Ballots.in.box")) %>% 
+    group_by(year) %>% 
+    summarise(total = sum(number))
+  
+  
+  gov_voters <- RU04_20 %>% 
+    filter(region %in% c(sel_region)) %>% 
+    filter(en_country %in% c(sel_country)) %>%
+    filter(Label %in% c("yes",
+                        "Путин Владимир Владимирович",
+                        "Медведев Дмитрий Анатольевич"
+    )) %>%
+    group_by(year) %>% 
+    summarize(gov_total = sum(number))
+  
+  reject_voters <- RU04_20 %>% 
+    filter(region == sel_region) %>% 
+    filter(en_country %in% c(sel_country)) %>%
+    filter(Label %in% c("Rejected.ballots",
+                        "Число недействительных избирательных бюллетеней")) %>% 
+    group_by(year) %>% 
+    summarize(reject_total = sum(number))
+  
+  against_voters <- RU04_20 %>% 
+    filter(region %in% c(sel_region)) %>% 
+    filter(en_country %in% c(sel_country)) %>%
+    filter(Label %in% c("Глазьев Сергей Юрьевич",
+                        "Против всех",
+                        "Малышкин Олег Александрович",
+                        "Миронов Сергей Михайлович",
+                        "Хакамада Ирина Муцуовна",
+                        "Харитонов Николай Михайлович",
+                        "Богданов Андрей Владимирович",
+                        "Жириновский Владимир Вольфович",
+                        "Зюганов Геннадий Андреевич",
+                        "Прохоров Михаил Дмитриевич",
+                        "Бабурин Сергей Николаевич",
+                        "Грудинин Павел Николаевич",
+                        "Собчак Ксения Анатольевна",
+                        "Сурайкин Максим Александрович",
+                        "Титов Борис Юрьевич",
+                        "Явлинский Григорий Алексеевич",
+                        "no")) %>% 
+    group_by(year) %>% 
+    summarize(against_total = sum(number))
+  
+  
+  sum_voters <- total_voters %>% 
+    left_join(gov_voters) %>% 
+    left_join(reject_voters) %>% 
+    left_join(against_voters) %>% 
+    mutate(gov_ratio = gov_total/total,
+           reject_ratio = reject_total/total,
+           against_ratio = against_total/total)
+  
+  
+  
+  g1 <- sum_voters %>% 
+    select(year,gov_total,reject_total,against_total) %>% 
+    pivot_longer(-year,names_to = "category",values_to = 'ratio') %>% 
+    mutate(category = case_when(
+      category == "gov_total" ~ "про-правительственный голос",
+      category == "against_total" ~ "голос против правительства",
+      category == "reject_total" ~ "испорченный",
+      TRUE~category
+    )) %>% 
+    ggplot()+
+    geom_bar(aes(x=year,
+                 y=ratio,
+                 fill=category), 
+                 position = 'fill', 
+                 stat = 'identity')+
+    geom_point(data = pu,
+               aes(x=year,y=rat_dec),
+               size = 4,
+               alpha = 0.9,
+               color = 'yellow'
+    ) +
+    scale_fill_manual(values = c('#0084D7','#005082','#8c190f'))+
+    theme_cowplot()+
+    theme_minimal_hgrid()+
+    scale_y_continuous(labels = scales::percent_format(accuracy = 1))+
+    labs(y="",x="",fill="",title=paste0("Процент голосующих ",sel_region_label,"  ",sel_country_label))+
+    theme(legend.position = 'top',
+          axis.line.x = element_blank(),
+          axis.ticks.x = element_blank())+
+    scale_x_continuous(breaks = c(2004,2008,2012,2018,2020))
+  
+  ggplotly(g1) %>%  
+    plotly::layout(legend=list(x=0, 
+                               xanchor='left',
+                               yanchor='top',
+                               orientation='h'))
+}
 
+voters_total()
+voters_total(sel_country = 'Austria')
+voters_total(sel_country = 'Germany')
+voters_total(sel_region = 'Europe')
+
+
+
+# total voters ------------------------------------------------------------
+
+total_voters <- function(sel_region = NA, sel_country = NA){
 if(is.na(sel_region)){
   sel_region = all_of(RU04_20$region)
   sel_region_label = NULL
@@ -93,7 +224,7 @@ if(is.na(sel_region)){
   sel_region
   sel_region_label = sel_region
 }
-  
+
 if(is.na(sel_country)){
   sel_country = all_of(RU04_20$en_country) 
   sel_country_label = NULL
@@ -101,94 +232,33 @@ if(is.na(sel_country)){
   sel_country
   sel_country_label = sel_country
 }  
-  
 total_voters <- RU04_20 %>% 
-  filter(region %in% c(sel_region)) %>% 
+  filter(region %in% c(sel_region)) %>%
   filter(en_country %in% c(sel_country)) %>%
   filter(Label %in% c("Число недействительных избирательных бюллетеней",
                       "Число действительных избирательных бюллетеней","Ballots.in.box")) %>% 
   group_by(year) %>% 
   summarise(total = sum(number))
 
-
-gov_voters <- RU04_20 %>% 
-  filter(region %in% c(sel_region)) %>% 
-  filter(en_country %in% c(sel_country)) %>%
-  filter(Label %in% c("yes",
-                      "Путин Владимир Владимирович",
-                      "Медведев Дмитрий Анатольевич"
-                      )) %>%
-  group_by(year) %>% 
-  summarize(gov_total = sum(number))
-  
-reject_voters <- RU04_20 %>% 
-  filter(region == sel_region) %>% 
-  filter(en_country %in% c(sel_country)) %>%
-  filter(Label %in% c("Rejected.ballots",
-                      "Число недействительных избирательных бюллетеней")) %>% 
-  group_by(year) %>% 
-  summarize(reject_total = sum(number))
-  
-against_voters <- RU04_20 %>% 
-  filter(region %in% c(sel_region)) %>% 
-  filter(en_country %in% c(sel_country)) %>%
-  filter(Label %in% c("Глазьев Сергей Юрьевич",
-                      "Против всех",
-                      "Малышкин Олег Александрович",
-                      "Миронов Сергей Михайлович",
-                      "Хакамада Ирина Муцуовна",
-                      "Харитонов Николай Михайлович",
-                      "Богданов Андрей Владимирович",
-                      "Жириновский Владимир Вольфович",
-                      "Зюганов Геннадий Андреевич",
-                      "Прохоров Михаил Дмитриевич",
-                      "Бабурин Сергей Николаевич",
-                      "Грудинин Павел Николаевич",
-                      "Собчак Ксения Анатольевна",
-                      "Сурайкин Максим Александрович",
-                      "Титов Борис Юрьевич",
-                      "Явлинский Григорий Алексеевич",
-                      "no")) %>% 
-  group_by(year) %>% 
-  summarize(against_total = sum(number))
-  
-
-sum_voters <- total_voters %>% 
-  left_join(gov_voters) %>% 
-  left_join(reject_voters) %>% 
-  left_join(against_voters) %>% 
-  mutate(gov_ratio = gov_total/total,
-         reject_ratio = reject_total/total,
-         against_ratio = against_total/total)
-
- 
-
-sum_voters %>% 
-  select(year,gov_total,reject_total,against_total) %>% 
-  pivot_longer(-year) %>% 
-  mutate(name = case_when(
-    name == "gov_total" ~ "про-правительственный голос",
-    name == "against_total" ~ "голос против правительства",
-    name == "reject_total" ~ "испорченный",
-    TRUE~name
-  )) %>% 
-  ggplot(aes(x=year,y=value,fill=name))+
-  geom_bar(position = 'fill',stat='identity')+
-  scale_fill_manual(values = c('#0084D7','#005082','#8c190f'))+
+g1 <- total_voters %>% 
+  ggplot(aes(x=year,y=total))+
+  geom_bar(position = 'stack',stat='identity')+
+  geom_text(aes(label=total,y=total*0.92),vjust = 1.5,color='grey80')+
   theme_cowplot()+
   theme_minimal_hgrid()+
-  scale_y_continuous(labels = scales::percent_format(accuracy = 1))+
-  labs(y="",x="",fill="",title=paste0(sel_region_label,"  ",sel_country_label))+
+  labs(y="",x="",fill="",title=paste0("Кол-во проголосовавших ",sel_region_label,"  ",sel_country_label),
+       subtitle= "Кол-во проголосовавших за рубежом")+
+  scale_x_continuous(breaks = c(2004,2008,2012,2018,2020))+
   theme(legend.position = 'top',
         axis.line.x = element_blank(),
-        axis.ticks.x = element_blank())+
-  scale_x_continuous(breaks = c(2004,2008,2012,2018,2020))
-  
+        axis.ticks.x = element_blank(),
+        plot.subtitle = element_text(size=12,color='grey70',hjust=1))
+# g1
+ggplotly(g1)
 }
-
-voters_total(sel_country = 'Estonia')
-voters_total(sel_country = 'Malta')
-voters_total(sel_region = 'Europe')
+options(scipen = 999)
+total_voters()
+total_voters(sel_country = 'Austria')
 
 RU04_20 %>% 
   distinct(en_country)
