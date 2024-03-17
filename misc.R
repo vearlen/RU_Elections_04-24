@@ -331,3 +331,174 @@ ggplotly(g1)
 fit <- lm(result~turnout, turnout_results18)
 summary(fit)
 
+
+
+
+# Europe ------------------------------------------------------------------
+eu_cntr <- RU04_20 %>% 
+  filter(region == "Europe") %>% 
+  distinct(en_country) %>% 
+  filter(!en_country %in% c("Moldova","Ukraine","Belarus")) %>% 
+  unlist()
+
+
+eu_cntr
+add_cntr <- c(eu_cntr,"Israel","United States of America","Canada","Vietnam")
+cntr_list <- c(eu_cntr,add_cntr)
+# clean up data, leave only PU and ME
+RU04_20_PM <-
+  RU04_20 %>% 
+  filter(str_detect(Label,'Пу|Ме|yes')) %>% 
+  group_by(en_country,year,region) %>% 
+  summarise(rat = mean(ratio)) %>% 
+  # filter(region == "Europe") %>%
+  mutate(color = case_when(
+    en_country == "Austria" ~ "red",
+    en_country == "Netherlands" ~ "forestgreen",
+    TRUE ~"grey80")
+  )
+
+test <- RU04_20_PM %>% 
+  filter(year==2012) %>% 
+  distinct(en_country) %>% tail() %>% list()
+
+
+# test[[1]][6,2]
+
+
+g1 <- RU04_20_PM %>%
+  ggplot(aes(x = year, y = rat, label = en_country)) +
+  geom_hline(yintercept = 50,
+             linewidth = 0.2,
+             color = 'grey20') +
+  geom_text_repel(
+    data = filter(RU04_20_PM,
+                  year == 2012,
+                  en_country %in% c("Austria")),
+    color = 'red',
+    segment.curvature = -0.1,
+    segment.ncp = 1,
+    segment.angle = 90,
+    box.padding = 3,
+    min.segment.length = 0,
+    size=5,
+    # fontface='bold',
+    nudge_x = -0.1
+  ) +
+  geom_text_repel(
+    data = filter(RU04_20_PM,
+                  year == 2012,
+                  en_country %in% c(test[[1]][6,2])),
+    color = 'grey30',
+    size=5,
+    segment.curvature = -0.5,
+    segment.ncp = 4,
+    segment.angle = 90,
+    box.padding = 1.4,
+    min.segment.length = 1,
+    nudge_x = -0.1,
+    # nudge_y = -1,
+    segment.shape=1
+  ) +
+  geom_text_repel(
+    data = filter(pu,
+                  year == 2012),
+    color = '#636201',
+    size=5,
+    nudge_x=1,
+    nudge_y=-8,
+    hjust=0,
+    segment.curvature = -0.1,
+    segment.ncp = 2,
+    segment.angle = 90,
+    box.padding = 1,
+    min.segment.length = 0
+  ) +
+  geom_jitter(
+    aes(group = en_country),
+    width = 0.2,
+    size = 2.5,
+    alpha =0.9,
+    color = 'grey10',
+    shape=21,
+    fill = 'grey80'
+  ) +
+  geom_star(
+    data = pu,
+    color = 'brown4',
+    size = 6,
+    alpha = 0.9,
+    fill = 'yellow'
+  ) +
+  geom_jitter(
+    data = filter(RU04_20_PM, en_country == "Austria"),
+    aes(group = en_country),
+    width = 0,
+    size = 4,
+    alpha = 0.8,
+    color = 'black',
+    fill = 'red',
+    shape = 21
+  ) +
+  geom_jitter(
+    data = filter(RU04_20_PM, en_country == test[[1]][6,2]),
+    aes(group = en_country),
+    width = 0,
+    height = 0,
+    size = 4,
+    alpha = 0.8,
+    color = 'black',
+    fill = 'green3',
+    shape = 21
+  ) +
+  theme_minimal() +
+  scale_color_identity() +
+  scale_x_continuous(breaks = c(2004, 2008, 2012, 2018, 2020)) +
+  scale_y_continuous(breaks = seq(20, 100, by = 10)) +
+  labs(
+    x = "",
+    y = "%",
+    title = "Как Европа голосовала на выборах президента РФ, референдуме 2020",
+    subtitle = "каждая точка - процент голосов в отдельной европейской стране за Путина/Медведева
+и за изменение конституции в 2020 году",
+    caption = "Источник данных: ЦИК России
+Сбор данных и визуализация: И. Тищенко"
+  ) +
+  
+  theme(
+    axis.line.x = element_line(color = 'grey80', linewidth = .0),
+    axis.ticks.x = element_line(color = 'grey80', linewidth = 0.0),
+    axis.text.x.bottom = element_text(size = 12, color = 'grey50',
+                                      margin = margin(-10,10,0,40)) ,
+    axis.text.y = element_text(size = 12),
+    panel.grid = element_blank(),
+    axis.title.y = element_text(
+      angle = 0,
+      vjust=0.95,
+      hjust=0.1,
+      size=13,
+      margin = margin (0,-12,0,20)),
+    # panel.grid.major.x = element_line(color='grey70',linetype =5, linewidth = 0.3),
+    panel.grid.major.y = element_line(
+      color = 'grey80',
+      linetype = 5,
+      linewidth = 0.3
+    ),
+    axis.text.x = element_blank(),
+    plot.title = element_text(hjust = 0, size = 17, face = 'bold'),
+    plot.caption = element_text(
+      size = 12,
+      color = 'grey50',
+      face =  'italic',
+      margin = margin(0, 0, 0, 0)
+    ),
+    plot.subtitle = element_text(
+      size = 14,
+      color = 'grey30',
+      hjust = 0
+    ),
+    legend.background = element_rect(fill = alpha('white', 0.8), colour = 'white'),
+    legend.title = element_blank()
+  )
+
+g1
