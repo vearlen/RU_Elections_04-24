@@ -305,20 +305,29 @@ RU04_20_PM <-
     en_country == "Netherlands" ~ "forestgreen",
     TRUE ~"grey80")
   )
-RU18_res <- RU04_20_PM %>% filter(year==2018)
+RU18_res <- RU04_20_PM %>% filter(year==2018) %>% 
+  select(en_country,year,rat) %>% 
+  mutate(result = rat*0.01) %>% 
+  select(-rat)
 
-turnout_results18 <-turnout18 %>%  
-  left_join(RU18_res) %>% 
-  mutate(result = rat*0.01,turnout = vote_ratio)
+turn18_clean <- turnout18 %>% 
+  filter(!is.na(vote_ratio)) %>% 
+  mutate(turnout = vote_ratio) %>% 
+  select(en_country, turnout)
+  
+
+turnout_results18 <- turn18_clean %>%  
+  left_join(RU18_res)
 
 g1 <- turnout_results18 %>% 
-  ggplot(aes(x=turnout,y=result))+
+  ggplot(aes(x=turnout,y=result,label = en_country))+
   geom_point()+
   geom_smooth(method = 'lm')+
-  geom_abline(slope = 1)
-g1
+  theme_minimal_grid()
+  # geom_abline(slope = 1)
+# g1
 ggplotly(g1)
 
-fit <- lm(turnout_results18$result~turnout_results18$turnout)
+fit <- lm(result~turnout, turnout_results18)
 summary(fit)
 
