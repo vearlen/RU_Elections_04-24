@@ -547,7 +547,12 @@ g1
 # Есть ли связь между явкой и процентом?
 
 ```{r}
-RU18_res <- RU04_20_PM %>% filter(year==2018) %>% 
+RU18_res <- 
+  RU04_20 %>% 
+  filter(str_detect(Label,'Пу|Ме|yes')) %>% 
+  group_by(en_country,year,region) %>% 
+  summarise(rat = mean(ratio)) %>% 
+  filter(year==2018) %>% 
   select(en_country,year,rat) %>% 
   mutate(result = rat*0.01) %>% 
   select(-rat)
