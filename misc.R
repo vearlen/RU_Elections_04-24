@@ -288,3 +288,37 @@ RU04_20 %>%
 #     "Титов Борис Юрьевич",
 #     "Явлинский Григорий Алексеевич"
 #   )
+
+
+# turnout vs result -------------------------------------------------------
+
+# clean up data, leave only PU and ME
+RU04_20_PM <-
+  RU04_20 %>% 
+  filter(str_detect(Label,'Пу|Ме|yes')) %>% 
+  group_by(en_country,year,region) %>% 
+  summarise(rat = mean(ratio)) %>% 
+  filter(region == "Europe") %>%
+  # distinct(en_country) %>% View()
+  mutate(color = case_when(
+    en_country == "Austria" ~ "red",
+    en_country == "Netherlands" ~ "forestgreen",
+    TRUE ~"grey80")
+  )
+RU18_res <- RU04_20_PM %>% filter(year==2018)
+
+turnout_results18 <-turnout18 %>%  
+  left_join(RU18_res) %>% 
+  mutate(result = rat*0.01,turnout = vote_ratio)
+
+g1 <- turnout_results18 %>% 
+  ggplot(aes(x=turnout,y=result))+
+  geom_point()+
+  geom_smooth(method = 'lm')+
+  geom_abline(slope = 1)
+g1
+ggplotly(g1)
+
+fit <- lm(turnout_results18$result~turnout_results18$turnout)
+summary(fit)
+

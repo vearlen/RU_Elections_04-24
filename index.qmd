@@ -25,6 +25,7 @@ library(cowplot)
 library(ggstar)
 library(DT)
 library('ggrepel')
+library(modelsummary)
 options(scipen = 999)
 RU04_20 <- read.csv("Data/RU04_20_Russia.csv", sep=";")
 
@@ -541,4 +542,39 @@ g1 <- RU04_20_PM %>%
   )
 
 g1
+```
+
+# Есть ли связь между явкой и процентом?
+
+```{r}
+RU18_res <- RU04_20_PM %>% filter(year==2018) %>% 
+  select(en_country,year,rat) %>% 
+  mutate(result = rat*0.01) %>% 
+  select(-rat)
+
+turn18_clean <- turnout18 %>% 
+  filter(!is.na(vote_ratio)) %>% 
+  mutate(turnout = vote_ratio) %>% 
+  select(en_country, turnout)
+  
+
+turnout_results18 <- turn18_clean %>%  
+  left_join(RU18_res)
+
+g1 <- turnout_results18 %>% 
+  ggplot(aes(x=turnout,y=result,label = en_country))+
+  geom_point()+
+  geom_smooth(method = 'lm')+
+  theme_minimal_grid()
+  # geom_abline(slope = 1)
+# g1
+ggplotly(g1)
+```
+
+#  
+
+```{r}
+
+fit <- lm(result~turnout, turnout_results18)
+summary(fit)
 ```
