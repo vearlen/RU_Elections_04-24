@@ -609,14 +609,70 @@ exit_cl <- exit24_city_split %>%
 
 # putin yes no UIK --------------------------------------------------------
 
-RU24 %>% 
-  
+# RU04_24 %>% 
+total_voters <- RU04_24 %>% 
+  filter(Label %in% c("Число недействительных избирательных бюллетеней",
+                      "Число действительных избирательных бюллетеней","Ballots.in.box")) %>% 
+  group_by(UIK,year) %>% 
+  summarise(total = sum(number))
+
+
+
+gov_voters <- RU04_24 %>% 
+
+  filter(Label %in% c("yes",
+                      "Путин Владимир Владимирович",
+                      "Медведев Дмитрий Анатольевич"
+  )) %>%
+  group_by(UIK,year) %>% 
+  summarize(gov_total = sum(number))
+
+reject_voters <- RU04_24 %>% 
+
+  filter(Label %in% c("Rejected.ballots",
+                      "Число недействительных избирательных бюллетеней")) %>% 
+  group_by(UIK,year) %>% 
+  summarize(reject_total = sum(number))
+
+against_voters <- RU04_24 %>% 
+  filter(Label %in% c("Глазьев Сергей Юрьевич",
+                      "Против всех",
+                      "Малышкин Олег Александрович",
+                      "Миронов Сергей Михайлович",
+                      "Хакамада Ирина Муцуовна",
+                      "Харитонов Николай Михайлович",
+                      "Богданов Андрей Владимирович",
+                      "Жириновский Владимир Вольфович",
+                      "Зюганов Геннадий Андреевич",
+                      "Прохоров Михаил Дмитриевич",
+                      "Бабурин Сергей Николаевич",
+                      "Грудинин Павел Николаевич",
+                      "Собчак Ксения Анатольевна",
+                      "Сурайкин Максим Александрович",
+                      "Титов Борис Юрьевич",
+                      "Явлинский Григорий Алексеевич",
+                      "Даванков Владислав Андреевич",
+                      "Слуцкий Леонид Эдуардович",
+                      "Харитонов Николай Михайлович",
+                      "no")) %>% 
+  group_by(UIK,year) %>% 
+  summarize(against_total = sum(number))
+
+
+sum_voters <- total_voters %>% 
+  left_join(gov_voters) %>% 
+  left_join(reject_voters) %>% 
+  left_join(against_voters) %>% 
+  mutate(gov_ratio = gov_total/total,
+         reject_ratio = reject_total/total,
+         against_ratio = against_total/total) %>% 
+  mutate(gov_flag = if_else(gov_ratio > 0.5, "Y","N"))
 
 # 2018 vs 2024 --------------------------------------------------------------------
 
   
 g1 <-
-  RU_total_UIK %>% 
+RU_total_UIK %>% 
   filter(year %in% c(2018, 2024)) %>% 
   # View()
   # bind_rows(exit_cl) %>% 
@@ -625,8 +681,10 @@ g1 <-
   pivot_wider(id_cols = c(UIK,en_country,Location),names_from = year,values_from = total) %>% 
   mutate(diff = `2024`- `2018`, ratio = round(diff/`2018`*100,0)) %>% 
   filter(!is.na(ratio)) %>% 
-
-  ggplot(aes(x=reorder(Location,-ratio),y=ratio))+
+  left_join(filter(sum_voters,year==2024)) %>% 
+  # View()
+  
+ggplot(aes(x=reorder(Location,-ratio),y=ratio,color=gov_flag))+
   geom_point(aes(
     text = paste0(
       en_country,
@@ -637,18 +695,21 @@ g1 <-
       '<br>2024: ',
       `2024`,
       '<br>',
-      ratio,'%'
-    )
-  ),color='#0084D7')+
+      ratio,'%',
+      '<br> gov ratio: ', round(gov_ratio,2)
+  )
+  ))+
   coord_flip()+
-  labs(x="",y="% разницы с 2018 годом",title = "Сравнение явки на выборах 2018 и 2024 года, данные ЦИК")+
+  labs(x="",y="% разницы с 2018 годом",
+       title = "Сравнение явки на выборах 2018 и 2024 года, данные ЦИК")+
   theme_minimal()+
   theme(plot.caption = element_text(size=10,hjust=0,vjust=0))
-# g1
+g1
 
 ggplotly(g1, tooltip = 'text') 
 
-
+RU04_24 %>% 
+  filter(year ==2024, is.na(en_country)) %>% View()
 # 2024 UIK vs Ex Poll -----------------------------------------------------
 
 
