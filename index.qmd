@@ -562,6 +562,19 @@ g1
 
 ```{r}
 exit24_prelim <- read.csv('Data/exit_poll_2024_prelim.csv',sep=';')
+
+exit24_city_split <- exit24_prelim %>% 
+  separate(Country,c("ru_country","en_country"),"/") %>% 
+  separate(City,c("ru_city","en_city"),"/") %>% 
+  fill(en_country) %>% 
+  fill(en_city) %>% 
+  mutate(en_country = str_trim(en_country)) %>% 
+  mutate(ru_city = str_trim(ru_city)) %>% 
+  mutate(en_country = case_when(
+    en_country == "Great Britain" ~ "United Kingdom",
+    en_country == "Federal Republic of Germany" ~ "Germany",
+    TRUE ~ en_country)) 
+  
   
 RU_total_UIK <- RU04_20 %>% 
   filter(Label %in% c("Число недействительных избирательных бюллетеней",
@@ -572,22 +585,16 @@ RU_total_UIK <- RU04_20 %>%
 ext_uik_list <- exit24_prelim %>% 
   distinct(Voting.station) %>% unlist()
 
-exit_cl <- exit24_prelim %>% 
-  separate(Country,c("ru_country","en_country"),"/") %>% 
-  separate(City,c("ru_city","en_city"),"/") %>% 
-  fill(en_country) %>% 
-  fill(en_city) %>% 
-  mutate(en_country = str_trim(en_country)) %>% 
-  mutate(ru_city = str_trim(ru_city)) %>% 
+
+exit_cl <- exit24_city_split %>% 
   select(-ru_country,-en_city) %>% 
-  mutate(en_country = case_when(
-    en_country == "Great Britain" ~ "United Kingdom",
-    en_country == "Federal Republic of Germany" ~ "Germany",
-    TRUE ~ en_country)) %>% 
-  select(en_country, Location = ru_city,UIK = Voting.station, Surveyed = Voters.surveyed,Exit = Voters.counted.at.the.exit) %>% 
+  select(en_country, 
+         Location = ru_city,
+         UIK = Voting.station, 
+         Surveyed = Voters.surveyed,
+         Exit = Voters.counted.at.the.exit) %>% 
   mutate(total = if_else(is.na(Exit),Surveyed,Exit),
          year = 2024)
-  
 
   
 g1 <- RU_total_UIK %>% 
@@ -614,8 +621,6 @@ g1 <- RU_total_UIK %>%
     )
   ),color='#0084D7')+
   coord_flip()+
-  # annotate('text',x=100,y=0,label = "Явка 2024 показана по результатам экзит пола,
-  # Внимание! Это не всегда полная явка, иногда это кол-во опрошенных, когда нет данных о всех.")+
   labs(x="",y="% разницы с 2018 годом",title = "Сравнение явки на выборах 2018 и 2024 года.",
        caption = "Явка 2024 показана по результатам экзит пола,
 Внимание! Это не всегда полная явка, иногда это кол-во опрошенных, когда нет данных о всех.")+
