@@ -12,18 +12,18 @@ RU04_20 %>%
 
 
 
-RU04_20 %>% 
-  filter(year == 2018,
-         region == 'Europe',
-         Label=='Число действительных избирательных бюллетеней') %>% 
-  group_by(en_country) %>% 
-  summarise(sum = sum(number)) %>% 
-  arrange(-sum) %>% 
-  write.csv('Data/2018_voted.csv',row.names = FALSE)
-  
+# RU04_20 %>% 
+#   filter(year == 2018,
+#          region == 'Europe',
+#          Label=='Число действительных избирательных бюллетеней') %>% 
+#   group_by(en_country) %>% 
+#   summarise(sum = sum(number)) %>% 
+#   arrange(-sum) %>% 
+#   write.csv('Data/2018_voted.csv',row.names = FALSE)
+#   
 turnout18 <- read.csv('Data/2018_voted.csv',sep = ';',dec = ',')
-# countries proportions ---------------------------------------------------
 RU04_20 <- read.csv("Data/RU04_20_Russia.csv")
+# countries proportions ---------------------------------------------------
 
 RU_total <- RU04_20 %>% 
   # filter(region == "Europe") %>%
@@ -502,3 +502,76 @@ g1 <- RU04_20_PM %>%
   )
 
 g1
+
+
+# exit poll ---------------------------------------------------------------
+exit24_prelim <- read.csv('Data/exit_poll_2024_prelim.csv',sep=';')
+  
+RU_total_UIK <- RU04_20 %>% 
+  filter(Label %in% c("Число недействительных избирательных бюллетеней",
+                      "Число действительных избирательных бюллетеней","Ballots.in.box")) %>% 
+  group_by(UIK,year,en_country,Location) %>% 
+  summarise(total = sum(number)) 
+
+ext_uik_list <- exit24_prelim %>% 
+  distinct(Voting.station) %>% unlist()
+
+exit_cl <- exit24_prelim %>% 
+  separate(Country,c("ru_country","en_country"),"/") %>% 
+  separate(City,c("ru_city","en_city"),"/") %>% 
+  fill(en_country) %>% 
+  fill(en_city) %>% 
+  mutate(en_country = str_trim(en_country)) %>% 
+  mutate(ru_city = str_trim(ru_city)) %>% 
+  select(-ru_country,-en_city) %>% 
+  mutate(en_country = case_when(
+    en_country == "Great Britain" ~ "United Kingdom",
+    en_country == "Federal Republic of Germany" ~ "Germany",
+    TRUE ~ en_country)) %>% 
+  select(en_country, Location = ru_city,UIK = Voting.station, Surveyed = Voters.surveyed,Exit = Voters.counted.at.the.exit) %>% 
+  mutate(total = if_else(is.na(Exit),Surveyed,Exit),
+         year = 2024)
+  
+
+  
+g1 <- RU_total_UIK %>% 
+  filter(year %in% c(2018)) %>% 
+  bind_rows(exit_cl) %>% 
+  filter(UIK %in% ext_uik_list) %>%
+  mutate(Location = str_trim(Location)) %>%
+  pivot_wider(id_cols = c(UIK,en_country,Location),names_from = year,values_from = total) %>% 
+  mutate(diff = `2024`- `2018`, ratio = round(diff/`2018`*100,0)) %>% 
+  filter(!is.na(ratio)) %>% 
+
+  ggplot(aes(x=reorder(Location,-ratio),y=ratio))+
+  geom_point(aes(
+    text = paste0(
+      en_country,
+      '<br>',
+      Location,
+      '<br>2018: ',
+      `2018`,
+      '<br>2024: ',
+      `2024`,
+      '<br>',
+      ratio,'%'
+    )
+  ),color='#0084D7')+
+  coord_flip()+
+  # annotate('text',x=100,y=0,label = "Явка 2024 показана по результатам экзит пола,
+  # Внимание! Это не всегда полная явка, иногда это кол-во опрошенных, когда нет данных о всех.")+
+  labs(x="",y="% разницы с 2018 годом",title = "Сравнение явки на выборах 2018 и 2024 года.",
+       caption = "Явка 2024 показана по результатам экзит пола,
+Внимание! Это не всегда полная явка, иногда это кол-во опрошенных, когда нет данных о всех.")+
+  theme_minimal()+
+  theme(plot.caption = element_text(size=10,hjust=0,vjust=0))
+g1
+
+ggplotly(g1, tooltip = 'text') %>% 
+layout(annotations = list(x = 50, y = 40, text = "Явка 2024 показана по результатам экзит пола,
+Внимание! Это не всегда полная явка, иногда это кол-во опрошенных, когда нет данных о всех
+                          https://voteabroad.info/",
+                            # xref='paper', yref='paper', 
+                          showarrow = F, xanchor='left', yanchor='left', xshift=0, yshift=0,
+                            font = list(size = 12)))
+
