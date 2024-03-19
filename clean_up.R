@@ -60,13 +60,31 @@ RU04_24_all %>%
   # View()
   group_by(year) %>% 
   summarise(total = sum(number))
-354577+26147
+# 354577+26147
 
-write.csv(RU04_24_all,'Data/RU04_24_Russia.csv')
+# write.csv(RU04_24_all,'Data/RU04_24_Russia.csv')
+
+cntr_iso <- read.csv('Data/all_countries.csv', sep = ';')
+names(RU04_24_all)
+
+RU04_24_corr <- RU04_24_all %>% 
+  filter(is.na(alpha.2)) %>%
+  filter(!en_country %in% c("Namibia","Osetia","Abkhazia")) %>% 
+  select(-c(alpha.2,alpha.3,region,sub.region)) %>% 
+  left_join(cntr_iso,by=join_by(en_country == name)) %>% 
+  select(Label,UIK,number,ratio,year,Location,country,en_country,alpha.2,alpha.3,region,sub.region)  
+
+
+# RU04_24big <- RU04_24_all %>% 
+#   filter(!is.na(alpha.2)) %>% 
+#   filter(!en_country %in% c("Namibia","Osetia","Abkhazia")) %>%
+  # select(-c(alpha.2,alpha.3,region,sub.region)) %>% 
+
+# 37898+360
 
 
 
-RU04_24_all %>% 
-  filter(is.na(alpha.2)) %>% 
-  distinct(en_country) %>% 
-  View()
+
+Namibia
+Osetia
+Abkhazia
