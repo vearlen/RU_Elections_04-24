@@ -1,5 +1,6 @@
 library(tidyverse)
-
+library(cowplot)
+library(plotly)
 # import data -------------------------------------------------------------
 RU04_24 <- read.csv('Data/RU04_24_Russia.csv')
 
@@ -27,28 +28,97 @@ RU04_20 %>%
 #   write.csv('Data/2018_voted.csv',row.names = FALSE)
 #   
 turnout18 <- read.csv('Data/2018_voted.csv',sep = ';',dec = ',')
-RU04_20 <- read.csv("Data/RU04_20_Russia.csv")
+RU04_20 <- read.csv("Data/RU04_20_Russia.csv", sep = ';')
+# RU24 elections ----------------------------------------------------------
+
+ru_en_cntr <- read.csv('Data/countries_ru_en.csv', sep= ';',fileEncoding = 'UTF-8')
+
+ru24_elections <- read.csv('Data/RU24_outside_elections.csv', dec = ',',check.names = FALSE)
+# 
+RU24_long <- ru24_elections %>%
+  rename(UIK = УИК, country = Страна, Location = Город) %>%
+  select(-"№") %>%
+  pivot_longer(cols = -c(UIK,country,Location),
+               names_to = "Label", values_to = "number")
+# 
+
+RU04_20_distinct_cntr <- RU04_20 %>% filter(year == 2018) %>% 
+  distinct(UIK,en_country,country,alpha.2,alpha.3,region,sub.region)
+# # 
+RU24_long_cntr <-  RU24_long  %>%  
+  left_join(RU04_20_distinct_cntr, by=join_by(UIK)) %>%
+  mutate(year = 2024) 
+
+
+
+# find where alpha.2 empty and add en country
+RU24_all_cntr <- RU24_long_cntr %>%
+  mutate(country.x = str_trim(country.x)) %>%
+  left_join(ru_en_cntr,by = join_by(country.x == RU_NAME)) %>%
+  mutate(en_country = if_else(is.na(en_country),EN_NAME,en_country)) %>%
+  rename(country = country.x) %>%
+  select(-c(EN_NAME,country.y))
+
+
+
+# all_cntr <- read.csv('Data/all_countries.csv',sep = ";")
+
+# all_cntr$name <- iconv(all_cntr$name, to="UTF-8")
+# RU24_all_cntr$en_country <- iconv(RU24_all_cntr$en_country,to="UTF-8")
+
+# RU24_all_cntr %>% 
+#   select(year,en_country,number,Label,Location,UIK,country) %>% 
+#   mutate_if(is.character,str_trim) %>%
+#   left_join(all_cntr %>% mutate_if(is.character,str_trim),by = join_by(en_country == name)) %>% 
+#   filter(is.na(alpha.2)) %>% 
+#   distinct(en_country) %>% 
+#   View()
+
+
+# Encoding(all_cntr$name)
+# Encoding(RU24_all_cntr$en_country)
+names(RU24_all_cntr)
+names(RU04_20)
+
+RU04_24 <- RU04_20 %>%
+  bind_rows(RU24_long_cntr) %>%
+  mutate(country = case_when(
+    is.na(country) ~ ifelse(is.na(country.y),country.x,country.y),
+    TRUE ~country
+  )) %>% 
+  select(-c(country.x,country.y)) %>% 
+  left_join(ru_en_cntr,by = join_by(country == RU_NAME)) %>% 
+  mutate(en_country = if_else(is.na(en_country),EN_NAME,en_country)) %>% 
+  select(-EN_NAME)
+  
+names(RU04_24)
+RU04_24 %>% 
+  filter(year ==2024, is.na(en_country)) %>% 
+  # distinct(en_country,UIK) %>% 
+  View()
+
+write.csv(RU04_24,'Data/RU04_24_Russia.csv',row.names = FALSE)
 # countries proportions ---------------------------------------------------
 
-RU_total <- RU04_20 %>% 
-  # filter(region == "Europe") %>%
-  filter(Label %in% c("Число недействительных избирательных бюллетеней",
-                      "Число действительных избирательных бюллетеней","Ballots.in.box")) %>% 
-  group_by(year) %>% 
-  summarise(total = sum(number)) 
-
-# cumulative add to total voters
-RU_cumsum <- RU04_20 %>% 
-  # filter(region == "Europe") %>% 
-  filter(Label %in% c("Число недействительных избирательных бюллетеней",
-                      "Число действительных избирательных бюллетеней","Ballots.in.box")) %>% 
-  group_by(en_country,year) %>% 
-  summarise(cntr_total = sum(number)) %>% 
-  arrange(-cntr_total) %>% 
-  left_join(RU_total) %>% 
-  mutate(ratio = round((cntr_total/total)*100,4)) %>%
-  group_by(year) %>% 
-  mutate(cum_rat = cumsum(ratio),cum_num = cumsum(cntr_total),index = row_number()) 
+# RU_total <- RU04_20 %>% 
+#   # filter(region == "Europe") %>%
+#   filter(Label %in% c("Число недействительных избирательных бюллетеней",
+#                       "Число действительных избирательных бюллетеней","Ballots.in.box")) %>% 
+#   group_by(year) %>% 
+#   summarise(total = sum(number)) 
+# 
+# # cumulative add to total voters
+# RU_cumsum <- RU04_20 %>% 
+#   # filter(region == "Europe") %>% 
+#   filter(Label %in% c("Число недействительных избирательных бюллетеней",
+#                       "Число действительных избирательных бюллетеней","Ballots.in.box")) %>% 
+#   group_by(en_country,year) %>% 
+#   summarise(cntr_total = sum(number)) %>% 
+#   arrange(-cntr_total) %>% 
+#   left_join(RU_total) %>% 
+#   mutate(ratio = round((cntr_total/total)*100,4)) %>%
+#   group_by(year) %>% 
+#   mutate(cum_rat = cumsum(ratio),cum_num = cumsum(cntr_total),index = row_number()) 
 
 # cumulative graph
 # RU_cumsum %>% 
@@ -60,41 +130,87 @@ RU_cumsum <- RU04_20 %>%
 #   panel_border()
 
 
-g1 <- RU_cumsum %>% 
-  filter(cum_rat <= 75) %>% 
-  filter(year==2018) %>% 
-  # arrange(year,-index) %>%
-  mutate(en_country = if_else(grepl("America",en_country),"USA",en_country)) %>%
-  # View()
-  ggplot(aes(
-    text = paste0(
-      "страна: ", en_country,
-      "<br>кол-во проголосовавших: ", cntr_total,
-      "<br>от всех избирателей: ", round(ratio,0),"%",
-      "<br>накопленный процент: ", round(cum_rat,0),"%"
-    )))+
-  geom_col(aes(y=ratio,x=reorder(en_country,-ratio)))+
-  geom_line(aes(y=cum_rat,group=1,x=reorder(en_country,-ratio)))+
-             # facet_grid(.~year)+
-             theme_cowplot()+
-             panel_border()+
-             labs(y="",x="")+
-  theme(axis.text.x = element_text(angle=90))
-         
+# g1 <- RU_cumsum %>% 
+#   filter(cum_rat <= 75) %>% 
+#   filter(year==2018) %>% 
+#   # arrange(year,-index) %>%
+#   mutate(en_country = if_else(grepl("America",en_country),"USA",en_country)) %>%
+#   # View()
+#   ggplot(aes(
+#     text = paste0(
+#       "страна: ", en_country,
+#       "<br>кол-во проголосовавших: ", cntr_total,
+#       "<br>от всех избирателей: ", round(ratio,0),"%",
+#       "<br>накопленный процент: ", round(cum_rat,0),"%"
+#     )))+
+#   geom_col(aes(y=ratio,x=reorder(en_country,-ratio)))+
+#   geom_line(aes(y=cum_rat,group=1,x=reorder(en_country,-ratio)))+
+#              # facet_grid(.~year)+
+#              theme_cowplot()+
+#              panel_border()+
+#              labs(y="",x="")+
+#   theme(axis.text.x = element_text(angle=90))
+#          
+# 
+# ggplotly(g1,tooltip = 'text')
+# 
+# 
+# RU_cumsum %>% 
+#   filter(cum_rat <= 75) %>% 
+#   group_by(year) %>% 
+#   summarize(n = max(index)) %>%
+#   ggplot(aes(x=year,y=n))+
+#   geom_col()
+# 
+# 
 
-ggplotly(g1,tooltip = 'text')
 
 
-RU_cumsum %>% 
-  filter(cum_rat <= 75) %>% 
+RU_total <- RU04_24 %>% 
+  # filter(region == "Europe") %>%
+  filter(Label %in% c("Число недействительных избирательных бюллетеней",
+                      "Число действительных избирательных бюллетеней",
+                      "Ballots.in.box")) %>% 
   group_by(year) %>% 
-  summarize(n = max(index)) %>%
-  ggplot(aes(x=year,y=n))+
-  geom_col()
+  summarise(total = sum(number)) 
 
+# cumulative add to total voters
+RU_cumsum <- RU04_24 %>% 
+  # filter(region == "Europe") %>% 
+  filter(Label %in% c("Число недействительных избирательных бюллетеней",
+                      "Число действительных избирательных бюллетеней","Ballots.in.box")) %>% 
+  group_by(en_country,year) %>% 
+  summarise(cntr_total = sum(number)) %>% 
+  arrange(-cntr_total) %>% 
+  left_join(RU_total) %>% 
+  mutate(ratio = round((cntr_total/total)*100,4)) %>%
+  group_by(year) %>% 
+  mutate(cum_rat = cumsum(ratio),cum_num = cumsum(cntr_total),index = row_number()) 
 
-
-sel_country = 'Austria'
+cum_75plot <-  function(el_year=2004){
+  g1 <- RU_cumsum %>% 
+    filter(cum_rat <= 75) %>% 
+    filter(year==el_year) %>% 
+    mutate(en_country = if_else(grepl("America",en_country),"USA",en_country)) %>%
+    ggplot(aes(
+      text = paste0(
+        "страна: ", en_country,
+        "<br>кол-во проголосовавших: ", cntr_total,
+        "<br>от всех избирателей: ", round(ratio,0),"%",
+        "<br>накопленный процент: ", round(cum_rat,0),"%",
+        "<br>накопленное кол-во проголосовавших/всего: ", cum_num," / ", total 
+      )))+
+    geom_col(aes(y=ratio,x=reorder(en_country,-ratio)),fill='#0084D7')+
+    geom_line(aes(y=cum_rat,group=1,x=reorder(en_country,-ratio)),color='grey40')+
+    geom_point(aes(y=cum_rat,x=reorder(en_country,-ratio)),color='grey40')+         
+    theme_minimal_hgrid()+
+    labs(y="",x="",title=el_year)+
+    theme(axis.text.x = element_text(angle=90))
+  
+  
+  ggplotly(g1,tooltip = 'text')
+}
+cum_75plot(el_year = 2024)
 # voters total-----------------------------------------------------------
 voters_total <- function(sel_region = NA, sel_country = NA){
   
@@ -697,19 +813,19 @@ ggplot(aes(x=reorder(Location,-ratio),y=ratio,color=gov_flag))+
       '<br>',
       ratio,'%',
       '<br> gov ratio: ', round(gov_ratio,2)
-  )
+  ),
+  alpha=0.6,
   ))+
   coord_flip()+
   labs(x="",y="% разницы с 2018 годом",
        title = "Сравнение явки на выборах 2018 и 2024 года, данные ЦИК")+
   theme_minimal()+
   theme(plot.caption = element_text(size=10,hjust=0,vjust=0))
-g1
+# g1
 
 ggplotly(g1, tooltip = 'text') 
 
-RU04_24 %>% 
-  filter(year ==2024, is.na(en_country)) %>% View()
+
 # 2024 UIK vs Ex Poll -----------------------------------------------------
 
 
@@ -749,24 +865,4 @@ g1 <-
 ggplotly(g1, tooltip = 'text')  
 
 
-# RU24 elections ----------------------------------------------------------
 
-# 
-# ru24_elections <- read.csv('Data/RU24_outside_elections.csv', dec = ',',check.names = FALSE)
-# 
-# RU24_long <- ru24_elections %>%
-#   rename(UIK = УИК, country = Страна, Location = Город) %>%
-#   select(-"№") %>%
-#   pivot_longer(cols = -c(UIK,country,Location),
-#                names_to = "Label", values_to = "number")
-# 
-# 
-# RU04_20_distinct_cntr <- RU04_20 %>%
-#   distinct(UIK,en_country,country,alpha.2,alpha.3,region,sub.region)
-# # 
-# RU24_long_cntr <-  RU24_long  %>%  left_join(RU04_20_distinct_cntr) %>%
-#   mutate(year = 2024)
-# # 
-# RU04_24 <- RU04_20 %>%
-#   bind_rows(RU24_long_cntr)
-# write.csv(RU04_24,'Data/RU04_24_Russia.csv',row.names = FALSE)

@@ -388,8 +388,10 @@ cum_75plot(el_year = 2018)
 cum_75plot(el_year = 2020)
 ```
 
+В 2024 вперед вырвался неожиданный кандидат - Кипр :) с 53216 голосующими :)
+
 ```{r}
-# cum_75plot(el_year = 2024)
+cum_75plot(el_year = 2024)
 ```
 
 В целом в любой год топ 5 стран дают почти 50% избирателей за рубежом и эти топ пять это:
@@ -406,7 +408,7 @@ RU_cumsum %>%
   
 ```
 
-Так что когда вам говорят россияне проголосовавшие за рубежом будьте внимательны. Республика Молдова с 80000 проголосовавших, это военные части в Приднестровье. В Грузии в 2004 и 2008 году очень много участков на территории минобороны. Эстония и Латвия - там, по-видимому, действительно ходят голосвать про-российски настроенные граждане. И их там, судя по всему, много - явка 39% и 55% соответственно.
+Так что когда вам говорят россияне проголосовавшие за рубежом будьте внимательны. Республика Молдова с 80000 проголосовавших, это военные части в Приднестровье. В Грузии в 2004 и 2008 году очень много участков на территории минобороны. Эстония и Латвия - там, по-видимому, действительно ходят голосвать про-российски настроенные граждане. И их там, судя по всему, много - явка 39% и 55% соответственно. А вот 53000 российских киприотов?!
 
 # Как же голосует Европа?
 
@@ -589,83 +591,151 @@ RU_cumsum %>%
 
 ```
 
-# Exit poll
+# Exit poll и ЦИК
 
 На графике ниже показано сравнение "явки" 2018 года (данные ЦИК) и явки 2024 года (данных экзит пол, <https://voteabroad.info/>). Надо понимать, что часто в 2024 это не явка, а количество опрошенных людей~~, но тем не менее пока есть только такие данные~~. В подавляющем большинстве участков людей меньше в 24 чем в 18-ом, что никак не вяжется с картинкой которую нам показывали и которую я видел сам - толпы людей. Видимо ключевая проблема в том, что я сделал неправильный вывод из картинки - количество людей в очереди никак не меняет количество людей прошедших через участок. Точнее контроль за количеством в руках УИКов все равно. Хотят пропустят больше, а не хотят не пропустят.
 
 ```{r exit poll vs 2018}
+#| fig-height: 8
 exit24_prelim <- read.csv('Data/exit_poll_2024_prelim.csv',sep=';')
 
-exit24_city_split <- exit24_prelim %>%
-  separate(Country,c("ru_country","en_country"),"/") %>%
-  separate(City,c("ru_city","en_city"),"/") %>%
-  fill(en_country) %>%
-  fill(en_city) %>%
-  mutate(en_country = str_trim(en_country)) %>%
-  mutate(ru_city = str_trim(ru_city)) %>%
+exit24_city_split <- exit24_prelim %>% 
+  separate(Country,c("ru_country","en_country"),"/") %>% 
+  separate(City,c("ru_city","en_city"),"/") %>% 
+  fill(en_country) %>% 
+  fill(en_city) %>% 
+  mutate(en_country = str_trim(en_country)) %>% 
+  mutate(ru_city = str_trim(ru_city)) %>% 
   mutate(en_country = case_when(
     en_country == "Great Britain" ~ "United Kingdom",
     en_country == "Federal Republic of Germany" ~ "Germany",
-    TRUE ~ en_country))
-
-
-RU_total_UIK <- RU04_20 %>%
+    TRUE ~ en_country)) 
+  
+  
+RU_total_UIK <- RU04_24 %>% 
   filter(Label %in% c("Число недействительных избирательных бюллетеней",
-                      "Число действительных избирательных бюллетеней","Ballots.in.box")) %>%
-  group_by(UIK,year,en_country,Location) %>%
-  summarise(total = sum(number))
+                      "Число действительных избирательных бюллетеней","Ballots.in.box")) %>% 
+  group_by(UIK,year,en_country,Location) %>% 
+  summarise(total = sum(number)) 
 
-ext_uik_list <- exit24_prelim %>%
+ext_uik_list <- exit24_prelim %>% 
   distinct(Voting.station) %>% unlist()
 
-
-exit_cl <- exit24_city_split %>%
-  select(-ru_country,-en_city) %>%
-  select(en_country,
+exit_cl <- exit24_city_split %>% 
+  select(-ru_country,-en_city) %>% 
+  select(en_country, 
          Location = ru_city,
-         UIK = Voting.station,
+         UIK = Voting.station, 
          Surveyed = Voters.surveyed,
-         Exit = Voters.counted.at.the.exit) %>%
+         Exit = Voters.counted.at.the.exit) %>% 
   mutate(total = if_else(is.na(Exit),Surveyed,Exit),
          year = 2024)
-# 
-#   
-# g1 <- RU_total_UIK %>% 
-#   filter(year %in% c(2018)) %>% 
-#   bind_rows(exit_cl) %>% 
-#   filter(UIK %in% ext_uik_list) %>%
-#   mutate(Location = str_trim(Location)) %>%
-#   pivot_wider(id_cols = c(UIK,en_country,Location),names_from = year,values_from = total) %>% 
-#   mutate(diff = `2024`- `2018`, ratio = round(diff/`2018`*100,0)) %>% 
-#   filter(!is.na(ratio)) %>% 
-#   ggplot(aes(x=reorder(Location,-ratio),y=ratio))+
-#   geom_point(aes(
-#     text = paste0(
-#       en_country,
-#       '<br>',
-#       Location,
-#       '<br>2018: ',
-#       `2018`,
-#       '<br>2024: ',
-#       `2024`,
-#       '<br>',
-#       ratio,'%'
-#     )
-#   ),color='#0084D7')+
-#   coord_flip()+
-#   labs(x="",y="% разницы с 2018 годом",title = "Сравнение явки на выборах 2018 и 2024 года.",
-#        caption = "Явка 2024 показана по результатам экзит пола,
-# Внимание! Это не всегда полная явка, иногда это кол-во опрошенных, когда нет данных о всех.")+
-#   theme_minimal()+
-#   theme(plot.caption = element_text(size=10,hjust=0,vjust=0))
-# 
-# 
-# ggplotly(g1, tooltip = 'text')  
+  
+# putin yes no UIK --------------------------------------------------------
+
+# RU04_24 %>% 
+total_voters <- RU04_24 %>% 
+  filter(Label %in% c("Число недействительных избирательных бюллетеней",
+                      "Число действительных избирательных бюллетеней","Ballots.in.box")) %>% 
+  group_by(UIK,year) %>% 
+  summarise(total = sum(number))
+
+
+
+gov_voters <- RU04_24 %>% 
+
+  filter(Label %in% c("yes",
+                      "Путин Владимир Владимирович",
+                      "Медведев Дмитрий Анатольевич"
+  )) %>%
+  group_by(UIK,year) %>% 
+  summarize(gov_total = sum(number))
+
+reject_voters <- RU04_24 %>% 
+
+  filter(Label %in% c("Rejected.ballots",
+                      "Число недействительных избирательных бюллетеней")) %>% 
+  group_by(UIK,year) %>% 
+  summarize(reject_total = sum(number))
+
+against_voters <- RU04_24 %>% 
+  filter(Label %in% c("Глазьев Сергей Юрьевич",
+                      "Против всех",
+                      "Малышкин Олег Александрович",
+                      "Миронов Сергей Михайлович",
+                      "Хакамада Ирина Муцуовна",
+                      "Харитонов Николай Михайлович",
+                      "Богданов Андрей Владимирович",
+                      "Жириновский Владимир Вольфович",
+                      "Зюганов Геннадий Андреевич",
+                      "Прохоров Михаил Дмитриевич",
+                      "Бабурин Сергей Николаевич",
+                      "Грудинин Павел Николаевич",
+                      "Собчак Ксения Анатольевна",
+                      "Сурайкин Максим Александрович",
+                      "Титов Борис Юрьевич",
+                      "Явлинский Григорий Алексеевич",
+                      "Даванков Владислав Андреевич",
+                      "Слуцкий Леонид Эдуардович",
+                      "Харитонов Николай Михайлович",
+                      "no")) %>% 
+  group_by(UIK,year) %>% 
+  summarize(against_total = sum(number))
+
+
+sum_voters <- total_voters %>% 
+  left_join(gov_voters) %>% 
+  left_join(reject_voters) %>% 
+  left_join(against_voters) %>% 
+  mutate(gov_ratio = gov_total/total,
+         reject_ratio = reject_total/total,
+         against_ratio = against_total/total) %>% 
+  mutate(gov_flag = if_else(gov_ratio > 0.5, "Y","N"))
+
+g1 <-
+RU_total_UIK %>% 
+  filter(year %in% c(2018, 2024)) %>% 
+  # View()
+  # bind_rows(exit_cl) %>% 
+  # filter(UIK %in% ext_uik_list) %>%
+  mutate(Location = str_trim(Location)) %>%
+  pivot_wider(id_cols = c(UIK,en_country,Location),names_from = year,values_from = total) %>% 
+  mutate(diff = `2024`- `2018`, ratio = round(diff/`2018`*100,0)) %>% 
+  filter(!is.na(ratio)) %>% 
+  left_join(filter(sum_voters,year==2024)) %>% 
+  # View()
+  
+ggplot(aes(x=reorder(Location,-ratio),y=ratio,color=gov_flag))+
+  geom_point(aes(
+    text = paste0(
+      en_country,
+      '<br>',
+      Location,
+      '<br>2018: ',
+      `2018`,
+      '<br>2024: ',
+      `2024`,
+      '<br>',
+      ratio,'%',
+      '<br> gov ratio: ', round(gov_ratio,2)
+  ),
+  alpha=0.6,
+  ))+
+  coord_flip()+
+  labs(x="",y="Показана разница явки в процентах между 2018 и 2024 годом, данные ЦИК",
+       title = "Сравнение явки на выборах 2018 и 2024 года",
+       color="За Путина",alpha="")+
+  theme_minimal()+
+  theme(plot.caption = element_text(size=10,hjust=0,vjust=0))
+# g1
+
+ggplotly(g1, tooltip = 'text') 
 ```
 
 Можно сравнить явку по экзит полам и ЦИК.
 
 ```{r}
+#| fig-height: 8
 RU04_24 <- read.csv('Data/RU04_24_Russia.csv')
  
 RU_total_UIK <- RU04_24 %>% 
