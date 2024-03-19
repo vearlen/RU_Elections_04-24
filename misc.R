@@ -478,8 +478,8 @@ total_voters(sel_country = "Malta")
 # turnout vs result -------------------------------------------------------
 
 # clean up data, leave only PU and ME
-RU04_20_PM <-
-  RU04_20 %>% 
+RU04_24_PM <-
+  RU04_24 %>% 
   filter(str_detect(Label,'Пу|Ме|yes')) %>% 
   group_by(en_country,year,region) %>% 
   summarise(rat = mean(ratio)) %>% 
@@ -490,6 +490,7 @@ RU04_20_PM <-
     en_country == "Netherlands" ~ "forestgreen",
     TRUE ~"grey80")
   )
+
 RU18_res <- RU04_20_PM %>% filter(year==2018) %>% 
   select(en_country,year,rat) %>% 
   mutate(result = rat*0.01) %>% 

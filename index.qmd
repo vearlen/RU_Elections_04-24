@@ -800,34 +800,31 @@ ggplotly(g1, tooltip = 'text')
 
 # Есть ли связь между явкой и процентом?
 
-```{r}
-# RU18_res <- 
-#   RU04_20 %>% 
-#   filter(str_detect(Label,'Пу|Ме|yes')) %>% 
-#   group_by(en_country,year,region) %>% 
-#   summarise(rat = mean(ratio)) %>% 
-#   filter(year==2018) %>% 
-#   select(en_country,year,rat) %>% 
-#   mutate(result = rat*0.01) %>% 
-#   select(-rat)
-# 
-# turn18_clean <- turnout18 %>% 
-#   filter(!is.na(vote_ratio)) %>% 
-#   mutate(turnout = vote_ratio) %>% 
-#   select(en_country, turnout)
-#   
-# 
-# turnout_results18 <- turn18_clean %>%  
-#   left_join(RU18_res)
-# 
-# g1 <- turnout_results18 %>% 
-#   ggplot(aes(x=turnout,y=result,label = en_country))+
-#   geom_point()+
-#   geom_smooth(method = 'lm')+
-#   theme_minimal_grid()
-#   # geom_abline(slope = 1)
-# # g1
-# ggplotly(g1)
+```{r votes vs people}
+RU04_24_PM <-
+  RU04_24 %>% 
+  filter(str_detect(Label,'Пу|Ме|yes')) %>% 
+  group_by(en_country,year,region) %>% 
+  summarise(rat = mean(ratio), people = sum(number)) %>% 
+  # filter(region == "Europe") %>%
+  # distinct(en_country) %>% View()
+  mutate(color = case_when(
+    en_country == "Austria" ~ "red",
+    en_country == "Netherlands" ~ "forestgreen",
+    TRUE ~"grey80")
+  )
+
+g1 <- RU04_24_PM %>% 
+  # filter(year == 2024) %>% 
+  ggplot(aes(x=people,y=rat, 
+             color=as.factor(year),
+             text = paste0(en_country,'<br>',people,"<br>",rat)))+
+  geom_point(alpha = 0.6, size=2)+
+  scale_x_log10()+
+  theme_minimal()+
+  labs(y="процент за Путина, %",x = "кол-во людей",color="")
+
+ggplotly(g1,tooltip = 'text')
 ```
 
 # 
