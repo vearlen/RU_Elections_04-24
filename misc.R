@@ -499,7 +499,7 @@ g1 <- RU04_24_PM %>%
   geom_point(alpha = 0.6, size=2)+
   scale_x_log10()+
   theme_minimal()+
-  labs(y="процент за Путина, %",x = "кол-во людей",color="")
+  labs(y="процент за Путина, %",x = "кол-во людей, log10()",color="")
 
 ggplotly(g1,tooltip = 'text')
 
