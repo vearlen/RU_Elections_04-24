@@ -62,4 +62,11 @@ RU04_24_all %>%
   summarise(total = sum(number))
 354577+26147
 
-write.csv(RU04_24_all,'Data/RU04_24_Russia_corr.csv')
+write.csv(RU04_24_all,'Data/RU04_24_Russia.csv')
+
+
+
+RU04_24_all %>% 
+  filter(is.na(alpha.2)) %>% 
+  distinct(en_country) %>% 
+  View()
