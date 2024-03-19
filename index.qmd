@@ -719,6 +719,7 @@ ggplot(aes(x=reorder(Location,-ratio),y=ratio,color=gov_flag))+
       ratio,'%',
       '<br> gov ratio: ', round(gov_ratio,2)
   ),
+  size=`2024`,
   alpha=0.6,
   ))+
   coord_flip()+
