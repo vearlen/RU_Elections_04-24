@@ -350,6 +350,7 @@ g1
 
 voters_total()
 voters_total(sel_country = 'Austria')
+voters_total(sel_country = 'Malta')
 voters_total(sel_country = 'Germany')
 voters_total(sel_region = 'Europe')
 
@@ -357,52 +358,52 @@ voters_total(sel_region = 'Europe')
 
 # total voters ------------------------------------------------------------
 
-total_voters <- function(sel_region = NA, sel_country = NA){
-if(is.na(sel_region)){
-  sel_region = all_of(RU04_20$region)
-  sel_region_label = NULL
-}  else {
-  sel_region
-  sel_region_label = sel_region
-}
-
-if(is.na(sel_country)){
-  sel_country = all_of(RU04_20$en_country) 
-  sel_country_label = NULL
-} else {
-  sel_country
-  sel_country_label = sel_country
-}  
-total_voters <- RU04_20 %>% 
-  filter(region %in% c(sel_region)) %>%
-  filter(en_country %in% c(sel_country)) %>%
-  filter(Label %in% c("Число недействительных избирательных бюллетеней",
-                      "Число действительных избирательных бюллетеней","Ballots.in.box")) %>% 
-  group_by(year) %>% 
-  summarise(total = sum(number))
-
-g1 <- total_voters %>% 
-  ggplot(aes(x=year,y=total))+
-  geom_bar(position = 'stack',stat='identity')+
-  geom_text(aes(label=total,y=total*0.92),vjust = 1.5,color='grey80')+
-  theme_cowplot()+
-  theme_minimal_hgrid()+
-  labs(y="",x="",fill="",title=paste0("Кол-во проголосовавших ",sel_region_label,"  ",sel_country_label),
-       subtitle= "Кол-во проголосовавших за рубежом")+
-  scale_x_continuous(breaks = c(2004,2008,2012,2018,2020))+
-  theme(legend.position = 'top',
-        axis.line.x = element_blank(),
-        axis.ticks.x = element_blank(),
-        plot.subtitle = element_text(size=12,color='grey70',hjust=1))
-# g1
-ggplotly(g1)
-}
-options(scipen = 999)
-total_voters()
-total_voters(sel_country = 'Austria')
-
-RU04_20 %>% 
-  distinct(en_country)
+# total_voters <- function(sel_region = NA, sel_country = NA){
+# if(is.na(sel_region)){
+#   sel_region = all_of(RU04_20$region)
+#   sel_region_label = NULL
+# }  else {
+#   sel_region
+#   sel_region_label = sel_region
+# }
+# 
+# if(is.na(sel_country)){
+#   sel_country = all_of(RU04_20$en_country) 
+#   sel_country_label = NULL
+# } else {
+#   sel_country
+#   sel_country_label = sel_country
+# }  
+# total_voters <- RU04_20 %>% 
+#   filter(region %in% c(sel_region)) %>%
+#   filter(en_country %in% c(sel_country)) %>%
+#   filter(Label %in% c("Число недействительных избирательных бюллетеней",
+#                       "Число действительных избирательных бюллетеней","Ballots.in.box")) %>% 
+#   group_by(year) %>% 
+#   summarise(total = sum(number))
+# 
+# g1 <- total_voters %>% 
+#   ggplot(aes(x=year,y=total))+
+#   geom_bar(position = 'stack',stat='identity')+
+#   geom_text(aes(label=total,y=total*0.92),vjust = 1.5,color='grey80')+
+#   theme_cowplot()+
+#   theme_minimal_hgrid()+
+#   labs(y="",x="",fill="",title=paste0("Кол-во проголосовавших ",sel_region_label,"  ",sel_country_label),
+#        subtitle= "Кол-во проголосовавших за рубежом")+
+#   scale_x_continuous(breaks = c(2004,2008,2012,2018,2020))+
+#   theme(legend.position = 'top',
+#         axis.line.x = element_blank(),
+#         axis.ticks.x = element_blank(),
+#         plot.subtitle = element_text(size=12,color='grey70',hjust=1))
+# # g1
+# ggplotly(g1)
+# }
+# options(scipen = 999)
+# total_voters()
+# total_voters(sel_country = 'Austria')
+# 
+# RU04_20 %>% 
+#   distinct(en_country)
 # c("Число избирателей, включенных в списки избирателей",
 #     "Число действительных избирательных бюллетеней",
 #     "Ballots.in.box",
@@ -473,6 +474,7 @@ total_voters <- function(sel_region = NA, sel_country = NA){
   ggplotly(g1)
 }
 total_voters(sel_country = "Austria")
+total_voters(sel_country = "Malta")
 # turnout vs result -------------------------------------------------------
 
 # clean up data, leave only PU and ME
