@@ -2,24 +2,73 @@ library(tidyverse)
 
 RU04_24 <- read.csv('Data/RU04_24_Russia.csv')
 
-RU24_ratio <- RU04_24 %>% 
-filter(str_detect(Label,'%')) %>% 
-  mutate(Label = str_replace(Label,"\\(%\\)","")) %>%
-  select(UIK,year,Label,ratio = number) %>% 
-  unite(key,UIK,year,Label)
+# clean up ----------------------------------------------------------------
 
-# str(RU04_24)
-# str(RU24_ratio)
-RU04_24_key <- RU04_24 %>% 
-  filter(year == 2024) %>% 
-  unite(key, UIK, year,Label) %>% 
-  select(-X)
 
-test <- rows_patch(RU04_24_key,RU24_ratio,by='key',unmatched = 'ignore')
+# RU04_24 %>% 
+#   filter(year == 2024) %>% 
+#   filter(str_detect(Label,"Пут|Дав|Слуц|Хар")) %>% 
+#   filter(is.na(ratio)) %>% 
+#   # distinct(UIK) %>% 
+#   View()
+# 
+# 
+# mis_UIK_ratio <- read.csv("Data/missingUIK2024_ratio.csv",sep = ";",check.names = FALSE)
+# 
+# mis_UIK_key <- mis_UIK_ratio %>% 
+#   pivot_longer(cols = -Label,names_to = "UIK",values_to = "ratio") %>% 
+#   mutate(year = 2024) %>% 
+#   unite(key, UIK,year,Label)
+# 
+# RU04_24_key <- RU04_24 %>% 
+#   unite(key,UIK,year,Label) %>% 
+#   select(-X) 
+# 
+# test <- rows_patch(RU04_24_key,mis_UIK_key,by='key') %>% 
+#   separate(key,into = c("UIK","year","Label"),sep = "_")
 
-RU04_24 %>% 
-  filter(year == 2024) %>% 
-  View()
+# RU24_ratio_upd <- RU04_24 %>% 
+#   filter(year == 2024) %>% 
+#   filter(str_detect(Label,'%')) %>% 
+#   mutate(Label = str_replace(Label,"\\(%\\)","")) %>%
+#   select(UIK,year,Label,ratio = number) %>% 
+#   unite(key,UIK,year,Label) %>% 
+#   mutate(key = str_trim(key))
+# 
+# # str(RU04_24)
+# # str(RU24_ratio)
+# RU04_24_key <- RU04_24 %>% 
+#   filter(year == 2024) %>% 
+#   filter(!str_detect(Label,'%')) %>% 
+#   unite(key, UIK, year,Label) %>% 
+#   mutate(key = str_trim(key)) %>% 
+#   select(-X)
+# 
+# RU24_ratio <- rows_patch(RU04_24_key,RU24_ratio_upd,by='key') # %>% 
+#   separate(key,into = c("UIK","year","Label"),sep = "_") %>% filter(!is.na(ratio)) %>% 
+#   mutate(UIK = is.integer(UIK))
+# 
+# RU04_24_clean <- RU04_24 %>% 
+#   # filter(year == 2024) %>% 
+#   filter(!str_detect(Label,'%')) %>% 
+#   unite(key,UIK,year,Label)
+# 
+# test <- rows_patch(RU04_24_clean,RU24_ratio,by='key') %>% 
+#   separate(key,into = c("UIK","year","Label"),sep = "_")
+# 
+# 
+# 
+# test %>% 
+#   filter(year == 2024) %>% 
+#   filter(Label %in% c("Число недействительных избирательных бюллетеней",
+#                                             "Число действительных избирательных бюллетеней","Ballots.in.box")) %>%
+#   group_by(year) %>% 
+#   summarise(sum = sum(number))
+
+# write.csv(test,'Data/RU04_24_Russia.csv',row.names = FALSE)
+
+
+
 # cleaning ----------------------------------------------------------------
 
 # 
