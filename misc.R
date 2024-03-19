@@ -481,15 +481,15 @@ total_voters(sel_country = "Malta")
 RU04_24_PM <-
   RU04_24 %>% 
   filter(str_detect(Label,'Пу|Ме|yes')) %>% 
-  group_by(en_country,year,region) %>% 
-  summarise(rat = mean(ratio), people = sum(number)) %>% 
-  # filter(region == "Europe") %>%
-  # distinct(en_country) %>% View()
-  mutate(color = case_when(
-    en_country == "Austria" ~ "red",
-    en_country == "Netherlands" ~ "forestgreen",
-    TRUE ~"grey80")
-  )
+  group_by(UIK,en_country,year,region) %>% 
+  summarise(rat = mean(ratio), people = sum(number)) #%>%
+  # # filter(region == "Europe") %>%
+  # # distinct(en_country) %>% View()
+  # mutate(color = case_when(
+  #   en_country == "Austria" ~ "red",
+  #   en_country == "Netherlands" ~ "forestgreen",
+  #   TRUE ~"grey80")
+  # )
 
 g1 <- RU04_24_PM %>% 
   # filter(year == 2024) %>% 
