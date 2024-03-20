@@ -1,6 +1,8 @@
 library(tidyverse)
 library(cowplot)
 library(plotly)
+library("gganimate")
+library('gifski')
 # import data -------------------------------------------------------------
 RU04_24 <- read.csv('Data/RU04_24_Russia.csv')
 
@@ -481,7 +483,7 @@ total_voters(sel_country = "Malta")
 RU04_24_PM <-
   RU04_24 %>% 
   filter(str_detect(Label,'Пу|Ме|yes')) %>% 
-  group_by(UIK,en_country,year,region) %>% 
+  group_by(en_country,year,region) %>% 
   summarise(rat = mean(ratio), people = sum(number)) #%>%
   # # filter(region == "Europe") %>%
   # # distinct(en_country) %>% View()
@@ -490,7 +492,7 @@ RU04_24_PM <-
   #   en_country == "Netherlands" ~ "forestgreen",
   #   TRUE ~"grey80")
   # )
-
+# write.csv(RU04_24_PM,'Data/RU04_24_per_year.csv',row.names = FALSE)
 g1 <- RU04_24_PM %>% 
   # filter(year == 2024) %>% 
   ggplot(aes(x=people,y=rat, 
@@ -529,7 +531,31 @@ ggplotly(g1)
 fit <- lm(result~turnout, turnout_results18)
 summary(fit)
 
+# animated plot -------
 
+g1 <- RU04_24_PM %>%
+  ggplot(aes(x=people,y=rat,color=region))+
+  geom_point(alpha = 0.7, size=6)+
+  scale_x_log10()+
+  theme_minimal(base_size = 20)+
+  labs(title = "Год: {frame_time}",
+    y = "процент за Путина %",
+    x = "кол-во людей, логарифмическая шкала",
+    color ="")+
+  transition_time(year)+
+  ease_aes('linear')
+
+animate(g1)
+animate(g1,
+  renderer = gifski_renderer('out/elec_04_24_country_test.gif'),
+  # renderer = av_renderer('Out/test.avi'),
+  fps = 5,
+  end_pause = 20,
+  start_pause = 1,
+  nframes = 100,
+  height = 800,
+  width = 800,
+  units = "px")
 
 
 # Europe ------------------------------------------------------------------
@@ -801,8 +827,13 @@ sum_voters <- total_voters %>%
 
 # 2018 vs 2024 --------------------------------------------------------------------
 
+# gov voters difference
+rat_dif18_24 <- sum_voters %>% 
+  pivot_wider(id_cols = UIK, names_from = year,values_from = gov_ratio) %>% 
+  mutate(rat_18_24 = `2018`-`2024`) %>% 
+  filter(!is.na(rat_18_24)) 
   
-g1 <-
+RU18_24_diff <- 
 RU_total_UIK %>% 
   filter(year %in% c(2018, 2024)) %>% 
   # View()
@@ -813,7 +844,20 @@ RU_total_UIK %>%
   mutate(diff = `2024`- `2018`, ratio = round(diff/`2018`*100,0)) %>% 
   filter(!is.na(ratio)) %>% 
   left_join(filter(sum_voters,year==2024)) %>% 
+  left_join(rat_dif18_24,by='UIK')
   # View()
+
+
+g1 <- RU18_24_diff %>% 
+  ggplot(aes(x=ratio,y=gov_ratio,size = total,
+             text=paste0(en_country,"<br>УИК: ",Location, "<br> разница в явке,%: ", ratio,
+                         "<br>результат у Путина в 2024,% ",gov_ratio,
+                         "<br>общее кол-во: ", total)))+
+  geom_point(alpha=0.6)+
+  theme_minimal()+
+  labs(x="кол-во людей 2018-2024, %", y="результат у Путина в 2024 %")
+  # scale_x_log10()
+ggplotly(g1, tooltip = 'text')
   
 ggplot(aes(x=reorder(Location,-ratio),y=ratio,color=gov_flag))+
   geom_point(aes(
@@ -881,3 +925,61 @@ ggplotly(g1, tooltip = 'text')
 
 
 
+
+
+
+
+
+
+
+# minobor -----------------------------------------------------------------
+
+
+RU_Pro_flag <- RU04_24 %>% 
+  distinct(UIK,year,Location,country,en_country) %>% 
+  mutate(Location = str_trim(Location)) %>%
+  mutate(ru_pro = case_when(
+    str_detect(Location,
+  'Миноб|ФСБ|батальон|ОКРМС|штаб|в/ч|Матросский|офицеров|ОШК|ДОФ|КСПМ|Батальон|Клуб 1472')~'Y',
+    str_detect(country,'Молда|Абха|Осет')~ "Y",
+    TRUE ~"N")) 
+
+# histogram ---------------------------------------------------------------
+RU04_24_PM <-
+  RU04_24 %>% 
+  filter(str_detect(Label,'Пу|Ме|yes')) %>% 
+  group_by(UIK,Location,en_country,year,region) %>% 
+  summarise(rat = mean(ratio), people = sum(number)) #%>%
+
+RU04_24_PM %>% 
+  mutate(Location = str_trim(Location)) %>%
+  left_join(RU_Pro_flag,by=join_by(UIK,year,Location,en_country)) %>%
+  mutate(year = as.factor(year)) %>%
+  arrange(year) %>% 
+  ggplot(aes(x=rat,fill=ru_pro))+
+  # geom_density()+
+  geom_histogram(position = "identity",alpha=0.7,binwidth = 2)+
+  theme_minimal()+
+  facet_grid(year~.)
+
+RU04_24_PM %>% 
+  mutate(Location = str_trim(Location)) %>%
+  left_join(RU_Pro_flag,by=join_by(UIK,year,Location,en_country)) %>%
+  group_by(year,ru_pro) %>%
+  summarise(people = sum(people)) %>%
+  pivot_wider(id_cols = year,names_from = ru_pro,values_from = people) %>%
+  mutate(Y_N_ratio = Y/(Y+N))
+
+
+RU04_24_PM %>% 
+  mutate(Location = str_trim(Location)) %>%
+  # head()
+  # filter(Location=="Решт") %>% 
+  # View()
+  left_join(RU_Pro_flag,by=join_by(UIK,year,Location,en_country)) %>%
+  filter(str_detect(Location,"Гюмр")) %>% 
+  # filter(year==2020,rat<70,ru_pro =="Y") %>%
+  arrange(year) %>%
+  View()
+  
+# write.csv('Data/all_UIKs.csv',row.names = FALSE)
