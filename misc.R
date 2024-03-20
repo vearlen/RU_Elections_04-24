@@ -352,6 +352,7 @@ g1
 
 voters_total()
 voters_total(sel_country = 'Austria')
+voters_total(sel_country = 'Israel')
 voters_total(sel_country = 'Malta')
 voters_total(sel_country = 'Germany')
 voters_total(sel_region = 'Europe')
