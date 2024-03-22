@@ -383,6 +383,7 @@ if(ratio){
 voters_total()
 voters_total(sel_country = 'Austria',ratio=FALSE)
 voters_total(sel_country = 'Armenia',ratio=FALSE)
+voters_total(sel_country = 'Malta',ratio=FALSE)
 voters_total(sel_country = 'Israel')
 voters_total(sel_country = 'Malta')
 voters_total(sel_country = 'Germany')
@@ -1024,7 +1025,10 @@ RU04_24_PM %>%
   theme_minimal_hgrid(font_size = 10)+
   facet_grid(year~.)+
   labs(x="процент за Путина, %", y= "голосов за Путина",fill="Военные и т.п.")+
-  scale_y_continuous(breaks = seq(0,100000,by=20000))+
+  scale_y_continuous(breaks = c(10000,30000,50000,80000),
+                     labels = c('10K','30k','50K','80K'))+
+   scale_x_discrete(labels = c('10','','20','','30','','40','','50','','60',
+                                '','70','','80','','90','','100'))+
   theme(legend.position = 'top',
         axis.line = element_blank())
 
