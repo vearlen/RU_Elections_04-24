@@ -213,8 +213,11 @@ cum_75plot <-  function(el_year=2004){
   ggplotly(g1,tooltip = 'text')
 }
 cum_75plot(el_year = 2024)
+
+sel_region = "Asia"
+sel_country = "Armenia"
 # voters total-----------------------------------------------------------
-voters_total <- function(sel_region = NA, sel_country = NA){
+voters_total <- function(sel_region = NA, sel_country = NA, ratio=TRUE){
   
   if(is.na(sel_region)){
     sel_region = all_of(RU04_24$region)
@@ -309,13 +312,34 @@ voters_total <- function(sel_region = NA, sel_country = NA){
     mutate(category = fct_relevel(category,'against P','spoiled ballot','pro P'))
   
   # sum_tmp$category <- relevel(sum_tmp$category,"pro P")
+  
+ g1 <-  sum_tmp %>% 
+    ggplot()+
+    geom_col(aes(x=year,y=ratio,fill=category))+
+    scale_fill_manual(values = c("pro P" = '#8c190f',
+                                 "against P" = '#0084D7',
+                                 "spoiled ballot" = '#005082'),
+                      breaks = c("pro P",
+                                 "against P",
+                                 "spoiled ballot" ),
+                      labels = c("pro P",
+                                 "against P",
+                                 "spoiled ballot" ))+
+    theme_cowplot()+
+    theme_minimal_hgrid()+
+    labs(y="people",x="",fill="",title=paste0("How Russians voted in",sel_region_label,"  ",sel_country_label),
+         subtitle="Official results, \"Russian\" official results with yellow dot")+
+    theme(legend.position = 'top',
+          axis.line.x = element_blank(),
+          axis.ticks.x = element_blank())+
+    scale_x_continuous(breaks = c(2004,2008,2012,2018,2020,2024))
     
-  g1 <- sum_tmp %>% 
+  g2 <- sum_tmp %>% 
     ggplot()+
     geom_bar(aes(x=year,
                  y=ratio,
                  fill=category), 
-                 position = 'fill', 
+                 position = 'fill',
                  stat = 'identity'
                 )+
     geom_point(data = pu,
@@ -336,22 +360,29 @@ voters_total <- function(sel_region = NA, sel_country = NA){
     theme_cowplot()+
     theme_minimal_hgrid()+
     scale_y_continuous(labels = scales::percent_format(accuracy = 1))+
-    labs(y="",x="",fill="",title=paste0("How Russians voted in",sel_region_label,"  ",sel_country_label),
+    labs(y="%",x="",fill="",title=paste0("How Russians voted in",sel_region_label,"  ",sel_country_label),
          subtitle="Official results, \"Russian\" official results with yellow dot")+
     theme(legend.position = 'top',
           axis.line.x = element_blank(),
           axis.ticks.x = element_blank())+
     scale_x_continuous(breaks = c(2004,2008,2012,2018,2020,2024))
-g1  
-  ggplotly(g1) %>%  
+  
+if(ratio){ 
+  ggplotly(g2) %>%  
     plotly::layout(legend=list(x=0, 
                                xanchor='left',
                                yanchor='top',
                                orientation='h'))
+}else{ggplotly(g1) %>%  
+    plotly::layout(legend=list(x=0, 
+                               xanchor='left',
+                               yanchor='top',
+                               orientation='h'))}
 }
 
 voters_total()
-voters_total(sel_country = 'Austria')
+voters_total(sel_country = 'Austria',ratio=FALSE)
+voters_total(sel_country = 'Armenia',ratio=FALSE)
 voters_total(sel_country = 'Israel')
 voters_total(sel_country = 'Malta')
 voters_total(sel_country = 'Germany')
@@ -767,7 +798,7 @@ exit_cl <- exit24_city_split %>%
 
 # putin yes no UIK --------------------------------------------------------
 
-# RU04_24 %>% 
+
 total_voters <- RU04_24 %>% 
   filter(Label %in% c("Число недействительных избирательных бюллетеней",
                       "Число действительных избирательных бюллетеней","Ballots.in.box")) %>% 
@@ -947,12 +978,6 @@ g1 <-
 # g1
 
 ggplotly(g1, tooltip = 'text')  
-
-
-
-
-
-
 
 
 
