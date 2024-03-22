@@ -166,48 +166,26 @@ RU_total_UIK %>%
   mutate(diff = `2024`- `2018`, ratio = round(diff/`2018`*100,0)) %>% 
   filter(!is.na(ratio)) %>% 
   left_join(filter(sum_voters,year==2024)) %>% 
-  mutate(Location = if_else(is.na(Location),as.character(UIK),Location)) 
+  mutate(Location = if_else(is.na(Location),paste0(en_country,'-',as.character(UIK)),Location)) %>% 
+  arrange(Location) %>% 
+  ungroup() %>% 
+  mutate(Location_Y = if_else(Location == lag(Location),paste0(Location,'-',as.character(UIK)),Location)) %>% 
+  mutate(Location_Y = if_else(is.na(Location_Y),Location,Location_Y))
   
-  
-# ggplot(aes(x=reorder(Location,-ratio),y=ratio,color=gov_flag))+
-#   geom_point(aes(
-#     text = paste0(
-#       en_country,
-#       '<br>',
-#       Location,
-#       '<br>2018: ',
-#       `2018`,
-#       '<br>2024: ',
-#       `2024`,
-#       '<br>',
-#       ratio,'%',
-#       '<br> gov ratio: ', round(gov_ratio,2)
-#   ),
-#   size=`2024`,
-#   alpha=0.6,
-#   ))+
-#   coord_flip()+
-#   labs(x="",y="Показана разница явки в процентах между 2018 и 2024 годом, данные ЦИК",
-#        title = "Сравнение явки на выборах 2018 и 2024 года",
-#        color="За Путина",alpha="")+
-#   theme_minimal()+
-#   theme(plot.caption = element_text(size=10,hjust=0,vjust=0))
-# g1
 
-# ggplotly(g1, tooltip = 'text') 
 pal <- c('brown','#0084D7')
 pal <- setNames(pal,c('Y','N'))
 p <-
   plot_ly(
     df_turnout_18_24,
-    y = ~ reorder(Location, -ratio),
+    y = ~ reorder(Location_Y, -ratio),
     x = ~ ratio,
     size = ~ `2024`,
     alpha = 0.6,
     color = ~ gov_flag,
     colors=pal,
     text = ~paste("Страна: ",en_country,
-                  '<br>УИК: ', Location,'/',UIK,
+                  '<br>УИК: ', Location_Y,'/',UIK,
                   '<br>Пришло',
                   '<br>  \'18:',`2018`,
                   '<br>  \'24:',`2024` ,
@@ -217,7 +195,7 @@ p <-
   ) %>% 
   add_markers(sizes = c(30,1000))
 
-p %>% layout(yaxis=list(title=""),xaxis=list(title="Разница в количестве людей 2018 и 2024 гг., %"))
+p %>% layout(yaxis=list(title=""),xaxis=list(title="Разница в количестве людей 2018 и 2024 гг., %"),legend = list(orientation = 'h',title = list(text = "За Путина?"),y = 1,x=0.2))
 ```
 
 Пропускная способность
