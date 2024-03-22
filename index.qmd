@@ -9,17 +9,19 @@ author: "Илья Тищенко"
 
 # Коротко
 
-В 2020 году мне стало интересно, как проголосовала заграница на референдуме по изменению конституции. В результате, родилась [вот такая](https://rpubs.com/vearlen/obnulis "Результаты российского референдума 2020 года") короткая заметка. В связи с предстоящими выборами (начал я писать до) я решил посмотреть ретроспективно на прошедшие выборы. Количество избирателей за границей порядка 1.7% от всех избирателей. Явка в странах за границей сильно варьирует от 2 до 70%, причем она *выше там где больше про-правительственных* избирателей, но есть ньюансы. Топ пять стран (50% от всех избирателей) это бывшие советские республики: Грузия, Молдова, Эстония, Украина, Латвия, Беларусь. Во многих из этих республик голосуют военные. Поэтому очень важно понимать, что имеется в виду когда говорится "российский изибратель за границей", часто это либо военные, либо люди на территории с российским военным присутствием.
+В 2020 году мне стало интересно, как проголосовала заграница на референдуме по изменению конституции. В результате, родилась [вот такая](https://rpubs.com/vearlen/obnulis "Результаты российского референдума 2020 года") короткая заметка. В 2024 прошли выборы в России. На основе данных собранных мной по заграничному голосованию в [Новой газете Европа](https://novayagazeta.eu/articles/2024/03/20/vosstanie-relokantov?fbclid=IwAR01A66cysVn84QduPZMTBjP3c1cIEfAVLW_drlLD7OGn7bNYmAMvk7sNck) вышла статья по участкам за границей. За что большое спасибо Алесе Соколовой, [подписывайтесь на её канал](https://t.me/research_for_democracy).
 
-Если же задаться вопросом и рассмотреть заграничные страны как некий референс отношения к текущей ситуации в России в каждый конкретный момент, то нужно выбрать эти страны аккуратно.
+Тут кратко некоторые вещи, заинтересовавшие лично меня в процессе работы над данными, в дополнение к статье.
 
-Я не журналист, просто люблю находить какие-то смыслы с помощью данных. В этот раз вышло немного больше чем в 20-ом. Собственно статья по моим данным вышла в [Новой газете](https://novayagazeta.eu/articles/2024/03/20/vosstanie-relokantov?fbclid=IwAR01A66cysVn84QduPZMTBjP3c1cIEfAVLW_drlLD7OGn7bNYmAMvk7sNck "Восстание релокантов."), за что большое спасибо Алесе Соколовой. Подписывайтесь на [её канал](https://t.me/research_for_democracy "Ненастоящий сошиал ресерч"). Если есть какие-то мысли пишите мне в телеграм @vearlen.
+-   Выросла ли явка? Мы все видели огромные очереди в избирательные участки, многие люди не попали внутрь. Краткий ответ в абсолютных значениях - нет.
 
-# Общие сведения
+-   Какой "демографический" состав голосующих за рубежом? Почему на всех прошлых выборых за границей результат, за исключением 20-го и 24-го годов, в среднем выше чем официальный в России? В основном за счет военных или территорий контролируемых Россией, как ни странно и за границей есть вбросы.
 
-```{r libraries}
-#| echo: false
-#| warning: false
+-   Менялось ли как-то распределение голосующих от года к году и как? Менялось, в 2018 году на выборы пришел очень маленький процент людей голосующих против Путина, в 2024 году таких было сильно больше, а людей за Путина пришло меньше.
+
+# Количество людей пришедших на голосование
+
+```{r}
 library(tidyverse)
 library(plotly)
 library(cowplot)
@@ -27,8 +29,7 @@ library(ggstar)
 library(DT)
 library('ggrepel')
 library(modelsummary)
-options(scipen = 999)
-RU04_20 <- read.csv("Data/RU04_20_Russia.csv", sep=";")
+# options(scipen = 999)
 RU04_24 <- read.csv("Data/RU04_24_Russia.csv")
 
 # official results PU, ME, Referendum
@@ -37,60 +38,14 @@ pu <- tibble(year=c(2004,2008,2012,2018,2020, 2024),
              en_country = rep("Официальный результат 
 выборов в РФ",6)) %>% 
   mutate(rat_dec = rat*0.01)
-#ratio_all  <-  round(1890863/112309947*100,1)
-#ratio_eu <- round(679028/112309947*100,1)
 ```
 
-В 2024 году за пределами России проживает 1 890 863[^1] избирателя, это 1.7% от всех избирателей. Если взять число проголосовавших в 2018 году (474366) то получится что в среднем голосует 25%.
-
-[^1]: [Интерфакс, кол-во избирателей в России](https://www.interfax.ru/russia/944186)
-
-### Явка
-
-Подробную явку оценить довольно сложно, т.к. сведения о проживающих в разных странах не всегда совпадают с годом голосования[^2] и не всегда легко доступны и достоверны. Ниже приведенный график дает общее представление, разброс явки от 2 до 70%. Лидируют: Республика Молдова, Латвия, Литва, Греция, Эстония, бывшие советские республики.
-
-[^2]: [Граждане РФ в Латвии](https://lz.lv/p/v-latvii-poschitali-grazhdan-rf-eto-kazhdyi-piatidesiatyi-zhitel-672177)
-
-```{r turnout}
-#| echo: false
-#| warning: false
-#| fig-height: 7
-turnout18 <- read.csv('Data/2018_voted.csv',sep = ';',dec = ',')
-
-
-g1 <- turnout18 %>%
-  filter(!is.na(vote_ratio)) %>%
-  ggplot(aes(x = reorder(en_country, -vote_ratio), y = vote_ratio*100,
-             text = paste0("страна: ", en_country,
-                           "<br>явка: ",vote_ratio*100,"%",
-                           "<br>всего: ", total_rus,
-                           "<br>голосовало: ", sum))) +
-  geom_col(width=0.7, fill='#0084D7') +
-  coord_flip() +
-  theme_cowplot() +
-  labs(x = "", y = "Явка на выборах 2018")+
-  theme(axis.line.y = element_blank(),
-        axis.ticks.y = element_blank(),
-        axis.line.x = element_blank())+
-  scale_y_continuous(expand = expansion(0.01,0.1))
-
-ggplotly(g1,tooltip = 'text')
-
-```
-
-Явка в Австрии 7% или 14%, последняя если считать относительно проживающих в Вене. На последние выборы президента в 2018 году в Вене пришло 2248 человека, в Австрии в 2018 году проживало 32 429[^3] человека с российским гражданством из них примерно 50% живет в Вене.
-
-[^3]: [Сколько россиян проживает в Австрии](https://www.integrationsfonds.at/fileadmin/user_upload/Fact_Sheet_41_Russische_Bevo__lkerung_V3.pdf)
-
-# Где живет большинство
-
-В Европе проживает в районе 679 028 человек, 0.6% от всех избирателей и 35% от всех проживающих за рубежом. Больше всего в Европе россиян живет в Германии - 237 816, 35% от всех "европейцев". Голосует в Германии тоже в районе 14%, на выборах 2018 проголосовали 33479 человека.
-
-### Как менялось количество и динамика голосования
-
-В целом кол-во голосующих с 2004 года росло, за исключением референдума 2020 года, на который пришло в два раза меньше чем на выборы 18-го.
+Как видно на @fig-total_voters общее абсолютное количество голосующих меньше чем в 2018 году, по-видимому, основная причина - закрытие участков для голосования.
 
 ```{r total voters function}
+#| label: fig-total_voters
+#| fig-cap: "Общее кол-во проголосовавших"
+
 total_voters <- function(sel_region = NA, sel_country = NA){
   if(is.na(sel_region)){
     sel_region = all_of(RU04_24$region)
@@ -119,13 +74,14 @@ total_voters <- function(sel_region = NA, sel_country = NA){
   g1 <- total_voters %>% 
     ggplot(aes(x=year,y=total))+
     geom_bar(position = 'stack',stat='identity', fill='#0084D7')+
-    geom_text(aes(label=total,y=total*0.84),vjust = 1.5,color='grey99',size=4)+
+    geom_text(aes(label=total,y=total*0.84),vjust = 1.5,color='grey99',size=3)+
     coord_flip()+
     theme_cowplot()+
-    theme_minimal_hgrid()+
-    labs(y="",x="",fill="",title=paste0("Кол-во проголосовавших ",sel_region_label,"  ",sel_country_label),
+    theme_minimal_grid(font_size = 9)+
+    labs(y="",x="",fill="",title=paste0("Количество проголосовавших за рубежом ",sel_region_label,"  ",sel_country_label),
          subtitle= "Кол-во проголосовавших за рубежом")+
-    scale_x_continuous(breaks = c(2004,2008,2012,2018,2020, 2024))+
+    scale_x_continuous(breaks = c(2024,2020,2018,2012,2008, 2004))+
+    scale_y_continuous(labels = scales::comma)+
     theme(legend.position = 'top',
           axis.line.x = element_blank(),
           axis.ticks.x = element_blank(),
@@ -133,586 +89,28 @@ total_voters <- function(sel_region = NA, sel_country = NA){
   # g1
   ggplotly(g1)
 }
-```
-
-```{r}
 total_voters()
 ```
 
-```{r all votes}
+Тем не менее, как и многие я видел огромные очереди в избирательные участки в Вене, [Берлине](https://youtu.be/JmQw0TTWopU?si=JmhoYO32GIe0qt16), [Париже](https://www.youtube.com/live/FfY5mVx6Ir8?si=2w4nwVIF3_f40x3a&t=1688), Лондоне и [прочих](https://youtu.be/PdUrk4EEZUk?si=zWqv3t0ERDLsFteK) [городах](https://youtu.be/MMVJ-81B_h0?si=2CYBKrxQgn0TA_Xp). Как изменилась явка на зарубежных участках? На @fig-turnout по оси Х показано изменение явки в 2024 по сравнению с 2018, положительные значения - людей пришло больше, размер точки - общее кол-во людей пришедших на участок.
 
-voters_total <- function(sel_region = NA, sel_country = NA){
-  
-  if(is.na(sel_region)){
-    sel_region = all_of(RU04_24$region)
-    sel_region_label = NULL
-  }  else {
-    sel_region
-    sel_region_label = sel_region
-  }
-  
-  if(is.na(sel_country)){
-    sel_country = all_of(RU04_24$en_country) 
-    sel_country_label = NULL
-  } else {
-    sel_country
-    sel_country_label = sel_country
-  }  
-  
-  total_voters <- RU04_24 %>% 
-    filter(region %in% c(sel_region)) %>% 
-    filter(en_country %in% c(sel_country)) %>%
-    filter(Label %in% c("Число недействительных избирательных бюллетеней",
-                        "Число действительных избирательных бюллетеней","Ballots.in.box")) %>% 
-    group_by(year) %>% 
-    summarise(total = sum(number))
-  
-  
-  
-  gov_voters <- RU04_24 %>% 
-    filter(region %in% c(sel_region)) %>%
-    filter(en_country %in% c(sel_country)) %>%
-    filter(Label %in% c("yes",
-                        "Путин Владимир Владимирович",
-                        "Медведев Дмитрий Анатольевич"
-    )) %>%
-    group_by(year) %>% 
-    summarize(gov_total = sum(number))
-  
-  reject_voters <- RU04_24 %>% 
-    filter(region == sel_region) %>%
-    filter(en_country %in% c(sel_country)) %>%
-    filter(Label %in% c("Rejected.ballots",
-                        "Число недействительных избирательных бюллетеней")) %>% 
-    group_by(year) %>% 
-    summarize(reject_total = sum(number))
-  
-  against_voters <- RU04_24 %>% 
-    filter(region %in% c(sel_region)) %>%
-    filter(en_country %in% c(sel_country)) %>%
-    filter(Label %in% c("Глазьев Сергей Юрьевич",
-                        "Против всех",
-                        "Малышкин Олег Александрович",
-                        "Миронов Сергей Михайлович",
-                        "Хакамада Ирина Муцуовна",
-                        "Харитонов Николай Михайлович",
-                        "Богданов Андрей Владимирович",
-                        "Жириновский Владимир Вольфович",
-                        "Зюганов Геннадий Андреевич",
-                        "Прохоров Михаил Дмитриевич",
-                        "Бабурин Сергей Николаевич",
-                        "Грудинин Павел Николаевич",
-                        "Собчак Ксения Анатольевна",
-                        "Сурайкин Максим Александрович",
-                        "Титов Борис Юрьевич",
-                        "Явлинский Григорий Алексеевич",
-                        "Даванков Владислав Андреевич",
-                        "Слуцкий Леонид Эдуардович",
-                        "Харитонов Николай Михайлович",
-                        "no")) %>% 
-    group_by(year) %>% 
-    summarize(against_total = sum(number))
-  
-  
-  sum_voters <- total_voters %>% 
-    left_join(gov_voters) %>% 
-    left_join(reject_voters) %>% 
-    left_join(against_voters) %>% 
-    mutate(gov_ratio = gov_total/total,
-           reject_ratio = reject_total/total,
-           against_ratio = against_total/total)
-  
-  
-  
-  sum_tmp <-  sum_voters %>% 
-    select(year,gov_total,reject_total,against_total) %>% 
-    pivot_longer(-year,names_to = "category",values_to = 'ratio') %>% 
-    mutate(category = case_when(
-      category == "gov_total" ~ "pro P",
-      category == "against_total" ~ "against P",
-      category == "reject_total" ~ "spoiled ballot",
-      TRUE~category
-    )) %>% 
-    mutate(category = fct_relevel(category,'against P','spoiled ballot','pro P'))
-  
-  # sum_tmp$category <- relevel(sum_tmp$category,"pro P")
-    
-  g1 <- sum_tmp %>% 
-    ggplot()+
-    geom_bar(aes(x=year,
-                 y=ratio,
-                 fill=category), 
-                 position = 'fill', 
-                 stat = 'identity'
-                )+
-    geom_point(data = pu,
-               aes(x=year,y=rat_dec),
-               size = 4,
-               alpha = 0.9,
-               color = 'yellow'
-    ) +
-    scale_fill_manual(values = c("pro P" = '#8c190f',
-                                 "against P" = '#0084D7',
-                                 "spoiled ballot" = '#005082'),
-                      breaks = c("pro P",
-                                 "against P",
-                                 "spoiled ballot" ),
-                      labels = c("pro P",
-                                 "against P",
-                                 "spoiled ballot" ))+
-    theme_cowplot()+
-    theme_minimal_hgrid()+
-    scale_y_continuous(labels = scales::percent_format(accuracy = 1))+
-    labs(y="",x="",fill="",title=paste0("How Russians voted in",sel_region_label,"  ",sel_country_label),
-         subtitle="Official results, \"Russian\" official results with yellow dot")+
-    theme(legend.position = 'top',
-          axis.line.x = element_blank(),
-          axis.ticks.x = element_blank())+
-    scale_x_continuous(breaks = c(2004,2008,2012,2018,2020,2024))
-g1  
-  ggplotly(g1) %>%  
-    plotly::layout(legend=list(x=0, 
-                               xanchor='left',
-                               yanchor='top',
-                               orientation='h'))
-}
-
-
-```
-
-Если посмотреть в целом на распределение голосующих за рубежом, то по сравнению с официальными результатами (показаны желтой точкой) результаты выше за Путина/Медведева. Единственное исключение - референдум 20-го года, 70 % против официальных 78%.
-
-```{r voters all ratio}
-voters_total()
-```
-
-Если смотреть на европу в целом как на регион, картина такая же.
-
-```{r voters europe ratio}
-
-voters_total(sel_region = 'Europe')
-
-```
-
-При том что некоторые страны довольно разительно отличаются от официального результата, см. ниже результат Великобритании. Тут после 12 года результат голосования значительно ниже официального.
-
-```{r}
-voters_total(sel_country = 'United Kingdom')
-
-```
-
-А как обстоят дела в Германии? Где живет больше всего российских европейцев. Тут наблюдается интересный тренд, в 2012 году результат у Путина ниже официального, а в 18-ом снова поднялся и даже стал больше. В 20-ом же вновь разрыв довольно большой.
-
-```{r germany}
-voters_total(sel_country = 'Germany')
-
-```
-
-Давайте попробуем понять, за счет чего в среднем по за границе результат получается выше, чем официальный. Ниже показаны страны, составляющие 75% от **всех** **проголосовавших** по годам.
-
-```{r countries input}
-
-RU_total <- RU04_24 %>% 
-  # filter(region == "Europe") %>%
-  filter(Label %in% c("Число недействительных избирательных бюллетеней",
-                      "Число действительных избирательных бюллетеней","Ballots.in.box")) %>% 
-  group_by(year) %>% 
-  summarise(total = sum(number)) 
-
-# cumulative add to total voters
-RU_cumsum <- RU04_24 %>% 
-  # filter(region == "Europe") %>% 
-  filter(Label %in% c("Число недействительных избирательных бюллетеней",
-                      "Число действительных избирательных бюллетеней","Ballots.in.box")) %>% 
-  group_by(en_country,year) %>% 
-  summarise(cntr_total = sum(number)) %>% 
-  arrange(-cntr_total) %>% 
-  left_join(RU_total) %>% 
-  mutate(ratio = round((cntr_total/total)*100,4)) %>%
-  group_by(year) %>% 
-  mutate(cum_rat = cumsum(ratio),cum_num = cumsum(cntr_total),index = row_number()) 
-
-cum_75plot <-  function(el_year=2004){
-g1 <- RU_cumsum %>% 
-  filter(cum_rat <= 75) %>% 
-  filter(year==el_year) %>% 
- mutate(en_country = if_else(grepl("America",en_country),"USA",en_country)) %>%
-  ggplot(aes(
-    text = paste0(
-      "страна: ", en_country,
-      "<br>кол-во проголосовавших: ", cntr_total,
-      "<br>от всех избирателей: ", round(ratio,0),"%",
-      "<br>накопленный процент: ", round(cum_rat,0),"%",
-      "<br>накопленное кол-во проголосовавших/всего: ", cum_num," / ", total 
-    )))+
-  geom_col(aes(y=ratio,x=reorder(en_country,-ratio)),fill='#0084D7')+
-  geom_line(aes(y=cum_rat,group=1,x=reorder(en_country,-ratio)),color='grey40')+
-  geom_point(aes(y=cum_rat,x=reorder(en_country,-ratio)),color='grey40')+         
-             theme_minimal_hgrid()+
-             labs(y="",x="",title=el_year)+
-  theme(axis.text.x = element_text(angle=90))
-         
-
-ggplotly(g1,tooltip = 'text')
-}
-
-```
-
-Как видно в 2004 году лидируют Грузия, Республика Молдова, Эстония, Украина - 45% в сумме.
-
-```{r}
-cum_75plot(el_year = 2004)
-```
-
-В 2008 это Грузия, Молдова, Эстония, Украина - 56% в сумме.
-
-```{r 2008}
-cum_75plot(el_year = 2008)
-```
-
-В 2012 году по понятным причинам Грузия исчезла появились Абхазия и Осетия. В топ шесть стран, составляющих 52% от проголосовавших, впервые попала Германия.
-
-```{r 2012}
-cum_75plot(el_year = 2012)
-```
-
-В 2018 исчезла Украина и кол-во стран набирающих 75% выросло до 18, для сравнения в 2008 их было 10. Германия переместилась на третье место по количеству проголосовавших. По-прежнему в пятерку в основном входят страны бывшие советские республики.
-
-```{r 2018}
-cum_75plot(el_year = 2018)
-
-```
-
-В 2020 году в топ 75% появилась Сирия, хотя на этим голосовании людей проголосовавших было на 60% меньше, чем в 2018 году.\
-
-```{r 2020}
-cum_75plot(el_year = 2020)
-```
-
-В 2024 вперед вырвался неожиданный кандидат - Кипр :) с 53216 голосующими :)
-
-```{r}
-cum_75plot(el_year = 2024)
-```
-
-В целом в любой год топ 5 стран дают почти 50% избирателей за рубежом и эти топ пять это:
-
-```{r}
-RU_cumsum %>% 
-  filter(index <=5) %>% 
-  select(en_country,year,cum_rat) %>% 
-  arrange(year,cum_rat) %>% 
-  select(-cum_rat) %>% 
-  pivot_wider(names_from = year,values_from = en_country) %>% 
-  unnest() %>% 
-  datatable(options = list(pageLength = 5, dom = 'tip'), rownames = FALSE)
-  
-```
-
-Я выделил участки где голосуют военные или же которые находятся на территории с военным российским присутствием.
-
-```{r military}
+```{r turnout}
+#| label: fig-turnout
+#| fig-cap: "Разница в явке между 2018 и 2024 годом"
 #| fig-height: 9
-#| 
-RU_Pro_flag <- RU04_24 %>% 
-  distinct(UIK,year,Location,country,en_country) %>% 
-  mutate(Location = str_trim(Location)) %>%
-  mutate(ru_pro = case_when(
-    str_detect(Location,
-  'Миноб|ФСБ|батальон|ОКРМС|штаб|в/ч|Матросский|офицеров|ОШК|ДОФ|КСПМ|Батальон|Клуб 1472')~'военные и пр.',
-    str_detect(country,'Молда|Абха|Осет')~ "военные и пр.",
-    TRUE ~"гражданские")) 
-
-tmp <- tibble(UIK=8236,Location='Гаага',ru_pro = "Нет",country = "Голландия",en_country = "Netherlands")
-RU_Pro_flag_upd <-    rows_update(RU_Pro_flag,tmp,by = c('UIK','Location'))
-
-# histogram ---------------------------------------------------------------
-RU04_24_PM <-
-  RU04_24 %>% 
-  filter(str_detect(Label,'Пу|Ме|yes')) %>% 
-  group_by(UIK,Location,en_country,year,region) %>% 
-  summarise(rat = mean(ratio), people = sum(number)) #%>%
-
-RU04_24_PM %>% 
-  mutate(Location = str_trim(Location)) %>%
-  left_join(RU_Pro_flag,by=join_by(UIK,year,Location,en_country)) %>%
-  mutate(year = as.factor(year)) %>%
-  arrange(year) %>%
-  mutate(rat_bin = cut(rat,seq(0,100,by=5),right = TRUE)) %>% 
-  group_by(year,rat_bin,ru_pro) %>% 
-  summarise(people_bin = sum(people)) %>% 
-  ggplot(aes(x=rat_bin,fill=ru_pro))+
-  geom_col(aes(y=people_bin),position=position_dodge2(preserve = 'single',padding = 0),width=0.5)+
-  scale_fill_manual(values = c('brown','#0084D7'))+
-  theme_minimal_hgrid(font_size = 10)+
-  facet_grid(year~.)+
-  labs(x="процент за Путина, %", y= "голосов за Путина",fill="")+
-  scale_y_continuous(breaks = c(10000,30000,50000,80000),
-                     labels = c('10K','30k','50K','80K'))+
-  scale_x_discrete(labels = c('10','','20','','30','','40','','50','','60',
-                                '','70','','80','','90','','100'))+
-  theme(legend.position = 'top',
-        axis.line = element_blank(),
-        panel.grid.major.y = element_line(color='grey70',linewidth=0.1))
-
-```
-
-У Важных историй получилось, что процент военных и квазигосударств [составляет 46%](https://istories.media/news/2024/03/18/bolee-46-golosov-za-putina-na-zarubezhnikh-territoriyakh-polucheno-v-podkontrolnikh-rossii-stranakh-i-voinskikh-chastyakh/), у меня вышло в районе 37% в 2024.
-
-```{r proportion of militaries}
-RU04_24_PM %>%
-  mutate(Location = str_trim(Location)) %>%
-  left_join(RU_Pro_flag,by=join_by(UIK,year,Location,en_country)) %>%
-  group_by(year,ru_pro) %>%
-  summarise(people = sum(people)) %>%
-  pivot_wider(id_cols = year,names_from = ru_pro,values_from = people) %>%
-  mutate(Y_N_ratio = `военные и пр.`/(`военные и пр.`+`гражданские`)) %>% 
-  ggplot()+
-  geom_col(aes(x=year,y=Y_N_ratio))+
-  geom_text(aes(x=year,label=paste0(round(Y_N_ratio*100,0),"%"),y=Y_N_ratio*0.92),vjust = 1.5,color='grey99')+
-  theme_minimal()+
-  scale_y_continuous(labels = scales::percent_format(accuracy = 1))+
-  labs(title="Доля военных",x="",y="")+
-  scale_x_continuous(breaks = c(2004,2008,2012,2018,2020,2024))
-  
-```
-
-Так что когда вам говорят россияне проголосовавшие за рубежом будьте внимательны. Республика Молдова с 80000 проголосовавших, это военные части в Приднестровье. В Грузии в 2004 и 2008 году очень много участков на территории минобороны. Эстония и Латвия - там, по-видимому, действительно ходят голосвать про-российски настроенные граждане. И их там, судя по всему, много - явка 39% и 55% соответственно. А вот 53000 российских киприотов?!
-
-# Как же голосует Европа?
-
-Учитывая выше сказанное нужно определиться в терминологии. Точнее нужно выбрать страны, на которые мы будем смотреть как на ~~прекрасную Россию будущего~~ те места, где люди голосуют как думают. При этом не следует забывать, что частью избирательного процесса является - конкуренция на выборах, альтернативные кандидаты, т.е. всё чего нет даже у тех кто живет за границей. По сути они выбирают между Путиным и остальным. Как написал Владимир Пастухов: "На тоталитарных выборах без выбора есть только две формы протеста: пассивная -- не приходить на выборы и активная -- прийти и испортить бюллетень. Все остальное от лукавого."
-
-```{r}
-#| echo: false
-#| warning: false
-#| fig-width: 10
-#| fig-height: 6
-#| fig-align: center
-
-
- 
-
-# clean up data, leave only PU and ME
-# RU04_20_PM <-
-#   RU04_20 %>% 
-#   filter(str_detect(Label,'Пу|Ме|yes')) %>% 
-#   group_by(en_country,year,region) %>% 
-#   summarise(rat = mean(ratio)) %>% 
-#   # filter(region == "Europe") %>%
-#   mutate(color = case_when(
-#     en_country == "Austria" ~ "red",
-#     en_country == "Netherlands" ~ "forestgreen",
-#                          TRUE ~"grey80")
-#     )
-# 
-# test <- RU04_20_PM %>% 
-#   filter(year==2012) %>% 
-#   distinct(en_country) %>% tail() %>% list()
-# 
-# 
-# # test[[1]][6,2]
-# 
-# 
-# g1 <- RU04_20_PM %>%
-#   ggplot(aes(x = year, y = rat, label = en_country)) +
-#   geom_hline(yintercept = 50,
-#              linewidth = 0.2,
-#              color = 'grey20') +
-#   geom_text_repel(
-#     data = filter(RU04_20_PM,
-#                   year == 2012,
-#                   en_country %in% c("Austria")),
-#     color = 'red',
-#     segment.curvature = -0.1,
-#     segment.ncp = 1,
-#     segment.angle = 90,
-#     box.padding = 3,
-#     min.segment.length = 0,
-#     size=5,
-#     # fontface='bold',
-#     nudge_x = -0.1
-#   ) +
-#   geom_text_repel(
-#     data = filter(RU04_20_PM,
-#                   year == 2012,
-#                   en_country %in% c(test[[1]][6,2])),
-#     color = 'grey30',
-#     size=5,
-#     segment.curvature = -0.5,
-#     segment.ncp = 4,
-#     segment.angle = 90,
-#     box.padding = 1.4,
-#     min.segment.length = 1,
-#     nudge_x = -0.1,
-#     # nudge_y = -1,
-#     segment.shape=1
-#   ) +
-#   geom_text_repel(
-#     data = filter(pu,
-#                   year == 2012),
-#     color = '#636201',
-#     size=5,
-#     nudge_x=1,
-#     nudge_y=-8,
-#     hjust=0,
-#     segment.curvature = -0.1,
-#     segment.ncp = 2,
-#     segment.angle = 90,
-#     box.padding = 1,
-#     min.segment.length = 0
-#   ) +
-#   geom_jitter(
-#     aes(group = en_country),
-#     width = 0.2,
-#     size = 2.5,
-#     alpha =0.9,
-#     color = 'grey10',
-#     shape=21,
-#     fill = 'grey80'
-#   ) +
-#   geom_star(
-#     data = pu,
-#     color = 'brown4',
-#     size = 6,
-#     alpha = 0.9,
-#     fill = 'yellow'
-#   ) +
-#   geom_jitter(
-#     data = filter(RU04_20_PM, en_country == "Austria"),
-#     aes(group = en_country),
-#     width = 0,
-#     size = 4,
-#     alpha = 0.8,
-#     color = 'black',
-#     fill = 'red',
-#     shape = 21
-#   ) +
-#   geom_jitter(
-#     data = filter(RU04_20_PM, en_country == test[[1]][6,2]),
-#     aes(group = en_country),
-#     width = 0,
-#     height = 0,
-#     size = 4,
-#     alpha = 0.8,
-#     color = 'black',
-#     fill = 'green3',
-#     shape = 21
-#   ) +
-#   theme_minimal() +
-#   scale_color_identity() +
-#   scale_x_continuous(breaks = c(2004, 2008, 2012, 2018, 2020)) +
-#   scale_y_continuous(breaks = seq(20, 100, by = 10)) +
-#   labs(
-#     x = "",
-#     y = "%",
-#     title = "Как Европа голосовала на выборах президента РФ, референдуме 2020",
-#     subtitle = "каждая точка - процент голосов в отдельной европейской стране за Путина/Медведева
-# и за изменение конституции в 2020 году",
-#     caption = "Источник данных: ЦИК России
-# Сбор данных и визуализация: И. Тищенко"
-#   ) +
-#   
-#   theme(
-#     axis.line.x = element_line(color = 'grey80', linewidth = .0),
-#     axis.ticks.x = element_line(color = 'grey80', linewidth = 0.0),
-#     axis.text.x.bottom = element_text(size = 12, color = 'grey50',
-#                                       margin = margin(-10,10,0,40)) ,
-#     axis.text.y = element_text(size = 12),
-#     panel.grid = element_blank(),
-#     axis.title.y = element_text(
-#       angle = 0,
-#       vjust=0.95,
-#       hjust=0.1,
-#       size=13,
-#       margin = margin (0,-12,0,20)),
-#     # panel.grid.major.x = element_line(color='grey70',linetype =5, linewidth = 0.3),
-#     panel.grid.major.y = element_line(
-#       color = 'grey80',
-#       linetype = 5,
-#       linewidth = 0.3
-#     ),
-#     axis.text.x = element_blank(),
-#     plot.title = element_text(hjust = 0, size = 17, face = 'bold'),
-#     plot.caption = element_text(
-#       size = 12,
-#       color = 'grey50',
-#       face =  'italic',
-#       margin = margin(0, 0, 0, 0)
-#     ),
-#     plot.subtitle = element_text(
-#       size = 14,
-#       color = 'grey30',
-#       hjust = 0
-#     ),
-#     legend.background = element_rect(fill = alpha('white', 0.8), colour = 'white'),
-#     legend.title = element_blank()
-#   )
-# 
-# g1
-```
-
-# Очереди в участки
-
-Мы все видели огромные очереди в участки за рубежом.
-
-```{r}
-
-```
-
-# Exit poll и ЦИК
-
-На графике ниже показано сравнение "явки" 2018 года (данные ЦИК) и явки 2024 года (данных экзит пол, <https://voteabroad.info/>). Надо понимать, что часто в 2024 это не явка, а количество опрошенных людей~~, но тем не менее пока есть только такие данные~~. В подавляющем большинстве участков людей меньше в 24 чем в 18-ом, что никак не вяжется с картинкой которую нам показывали и которую я видел сам - толпы людей. Видимо ключевая проблема в том, что я сделал неправильный вывод из картинки - количество людей в очереди никак не меняет количество людей прошедших через участок. Точнее контроль за количеством в руках УИКов все равно. Хотят пропустят больше, а не хотят не пропустят.
-
-```{r exit poll vs 2018}
-#| fig-height: 8
-exit24_prelim <- read.csv('Data/exit_poll_2024_prelim.csv',sep=';')
-
-exit24_city_split <- exit24_prelim %>% 
-  separate(Country,c("ru_country","en_country"),"/") %>% 
-  separate(City,c("ru_city","en_city"),"/") %>% 
-  fill(en_country) %>% 
-  fill(en_city) %>% 
-  mutate(en_country = str_trim(en_country)) %>% 
-  mutate(ru_city = str_trim(ru_city)) %>% 
-  mutate(en_country = case_when(
-    en_country == "Great Britain" ~ "United Kingdom",
-    en_country == "Federal Republic of Germany" ~ "Germany",
-    TRUE ~ en_country)) 
-  
-  
 RU_total_UIK <- RU04_24 %>% 
   filter(Label %in% c("Число недействительных избирательных бюллетеней",
                       "Число действительных избирательных бюллетеней","Ballots.in.box")) %>% 
   group_by(UIK,year,en_country,Location) %>% 
   summarise(total = sum(number)) 
 
-ext_uik_list <- exit24_prelim %>% 
-  distinct(Voting.station) %>% unlist()
-
-exit_cl <- exit24_city_split %>% 
-  select(-ru_country,-en_city) %>% 
-  select(en_country, 
-         Location = ru_city,
-         UIK = Voting.station, 
-         Surveyed = Voters.surveyed,
-         Exit = Voters.counted.at.the.exit) %>% 
-  mutate(total = if_else(is.na(Exit),Surveyed,Exit),
-         year = 2024)
-  
-# putin yes no UIK --------------------------------------------------------
-
-# RU04_24 %>% 
 total_voters <- RU04_24 %>% 
   filter(Label %in% c("Число недействительных избирательных бюллетеней",
                       "Число действительных избирательных бюллетеней","Ballots.in.box")) %>% 
   group_by(UIK,year) %>% 
   summarise(total = sum(number))
 
-
-
 gov_voters <- RU04_24 %>% 
-
   filter(Label %in% c("yes",
                       "Путин Владимир Владимирович",
                       "Медведев Дмитрий Анатольевич"
@@ -721,7 +119,6 @@ gov_voters <- RU04_24 %>%
   summarize(gov_total = sum(number))
 
 reject_voters <- RU04_24 %>% 
-
   filter(Label %in% c("Rejected.ballots",
                       "Число недействительных избирательных бюллетеней")) %>% 
   group_by(UIK,year) %>% 
@@ -761,147 +158,82 @@ sum_voters <- total_voters %>%
          against_ratio = against_total/total) %>% 
   mutate(gov_flag = if_else(gov_ratio > 0.5, "Y","N"))
 
-g1 <-
+df_turnout_18_24 <- 
 RU_total_UIK %>% 
   filter(year %in% c(2018, 2024)) %>% 
-  # View()
-  # bind_rows(exit_cl) %>% 
-  # filter(UIK %in% ext_uik_list) %>%
   mutate(Location = str_trim(Location)) %>%
   pivot_wider(id_cols = c(UIK,en_country,Location),names_from = year,values_from = total) %>% 
   mutate(diff = `2024`- `2018`, ratio = round(diff/`2018`*100,0)) %>% 
   filter(!is.na(ratio)) %>% 
   left_join(filter(sum_voters,year==2024)) %>% 
-  # View()
+  mutate(Location = if_else(is.na(Location),as.character(UIK),Location)) 
   
-ggplot(aes(x=reorder(Location,-ratio),y=ratio,color=gov_flag))+
-  geom_point(aes(
-    text = paste0(
-      en_country,
-      '<br>',
-      Location,
-      '<br>2018: ',
-      `2018`,
-      '<br>2024: ',
-      `2024`,
-      '<br>',
-      ratio,'%',
-      '<br> gov ratio: ', round(gov_ratio,2)
-  ),
-  size=`2024`,
-  alpha=0.6,
-  ))+
-  coord_flip()+
-  labs(x="",y="Показана разница явки в процентах между 2018 и 2024 годом, данные ЦИК",
-       title = "Сравнение явки на выборах 2018 и 2024 года",
-       color="За Путина",alpha="")+
-  theme_minimal()+
-  theme(plot.caption = element_text(size=10,hjust=0,vjust=0))
+  
+# ggplot(aes(x=reorder(Location,-ratio),y=ratio,color=gov_flag))+
+#   geom_point(aes(
+#     text = paste0(
+#       en_country,
+#       '<br>',
+#       Location,
+#       '<br>2018: ',
+#       `2018`,
+#       '<br>2024: ',
+#       `2024`,
+#       '<br>',
+#       ratio,'%',
+#       '<br> gov ratio: ', round(gov_ratio,2)
+#   ),
+#   size=`2024`,
+#   alpha=0.6,
+#   ))+
+#   coord_flip()+
+#   labs(x="",y="Показана разница явки в процентах между 2018 и 2024 годом, данные ЦИК",
+#        title = "Сравнение явки на выборах 2018 и 2024 года",
+#        color="За Путина",alpha="")+
+#   theme_minimal()+
+#   theme(plot.caption = element_text(size=10,hjust=0,vjust=0))
 # g1
 
-ggplotly(g1, tooltip = 'text') 
+# ggplotly(g1, tooltip = 'text') 
+pal <- c('brown','#0084D7')
+pal <- setNames(pal,c('Y','N'))
+p <-
+  plot_ly(
+    df_turnout_18_24,
+    y = ~ reorder(Location, -ratio),
+    x = ~ ratio,
+    size = ~ `2024`,
+    alpha = 0.6,
+    color = ~ gov_flag,
+    colors=pal,
+    text = ~paste("Страна: ",en_country,
+                  '<br>УИК: ', Location,'/',UIK,
+                  '<br>Пришло',
+                  '<br>  \'18:',`2018`,
+                  '<br>  \'24:',`2024` ,
+                  '<br>разница: ', ratio,
+                  '%<br>за Путина: ',round(gov_ratio*100,0),'%'),
+    hoverinfo = 'text'
+  ) %>% 
+  add_markers(sizes = c(30,1000))
+
+p %>% layout(yaxis=list(title=""),xaxis=list(title="Разница в количестве людей 2018 и 2024 гг., %"))
 ```
 
-Можно сравнить явку по экзит полам и ЦИК.
+Пропускная способность
 
-```{r}
-#| fig-height: 8
-RU04_24 <- read.csv('Data/RU04_24_Russia.csv')
- 
-RU_total_UIK <- RU04_24 %>% 
-  filter(Label %in% c("Число недействительных избирательных бюллетеней",
-                      "Число действительных избирательных бюллетеней","Ballots.in.box")) %>% 
-  group_by(UIK,year,en_country,Location) %>% 
-  summarise(total = sum(number)) 
+# Демографический состав голосующих
 
-ext_uik_list <- exit24_prelim %>% 
-  distinct(Voting.station) %>% unlist()
+Кол-во военных \> результат
 
-exit_cl <- exit24_city_split %>% 
-  select(-ru_country,-en_city) %>% 
-  select(en_country, 
-         Location = ru_city,
-         UIK = Voting.station, 
-         Surveyed = Voters.surveyed,
-         Exit = Voters.counted.at.the.exit) %>% 
-  mutate(total = if_else(is.na(Exit),Surveyed,Exit),
-         year = 2024)
+Вбросы
 
+# Динамика голосования
 
+Изменение распределения
 
-CIK_vs_ExP <- 
-  RU_total_UIK %>% 
-  filter(year %in% c(2024)) %>% 
-  left_join(exit_cl,by = join_by(UIK)) %>% 
-  filter(UIK %in% ext_uik_list) %>%
-  rename(total = total.x,ex_poll = total.y,en_country = en_country.x,
-         Location = Location.x) %>% 
-  mutate( diff = total-ex_poll,
-         ratio = round(diff/total*100,0)) %>% 
-  filter(!is.na(ratio)) 
+Кто пришел когда, кто придет в 2030?
 
-g1 <- CIK_vs_ExP %>% 
-  ggplot(aes(x=reorder(Location,-ratio),y=ratio))+
-  geom_point(aes(
-    text = paste0(
-      en_country,
-      '<br>',
-      Location,
-      '<br>ЦИК: ',
-      total,
-      '<br>ExPoll: ',
-      ex_poll,
-      '<br>',
-      ratio,'%'
-    )
-  ),color='#0084D7')+
-  coord_flip()+
-  labs(x="",y="% разницы с данными ЦИКа",title = "Сравнение явки на выборах по данным ЦИКа и экзит полов, 2024 года",
-       caption = "Явка 2024 показана по результатам экзит пола,
-Внимание! Это не всегда полная явка, иногда это кол-во опрошенных, когда нет данных о всех.")+
-  theme_minimal()+
-  theme(plot.caption = element_text(size=10,hjust=0,vjust=0))
+# Данные
 
-ggplotly(g1, tooltip = 'text')  
-```
-
-В среднем exit poll занижает явку на `r mean(CIK_vs_ExP$ratio) %>% round(0)` %.
-
-# Есть ли связь между явкой и процентом?
-
-В целом будто-бы и нет очевидных накруток, но если присмотреться, то видно что чем больше людей на участке, тем меньше вариативность. После 3000 человек на участок процента ниже чем 60% за Путина нет.
-
-```{r votes vs people}
-RU04_24_PM <-
-  RU04_24 %>% 
-  filter(str_detect(Label,'Пу|Ме|yes')) %>% 
-  group_by(UIK,en_country,year,region) %>% 
-  summarise(rat = mean(ratio), people = sum(number)) #%>%
-  # # filter(region == "Europe") %>%
-  # # distinct(en_country) %>% View()
-  # mutate(color = case_when(
-  #   en_country == "Austria" ~ "red",
-  #   en_country == "Netherlands" ~ "forestgreen",
-  #   TRUE ~"grey80")
-  # )
-
-g1 <- RU04_24_PM %>% 
-  # filter(year == 2024) %>% 
-  ggplot(aes(x=people,y=rat, 
-             color=as.factor(year),
-             text = paste0(en_country,'<br>кол-во: ',people,"<br>%: ",rat)))+
-  geom_point(alpha = 0.6, size=2)+
-  scale_x_log10()+
-  theme_minimal()+
-  labs(y="процент за Путина, %",x = "кол-во людей, логарифмированная шкала",color="",title = "Кол-во людей на участке и процент за Путина")
-
-ggplotly(g1,tooltip = 'text')
-```
-
-# 
-
-```{r}
-# 
-# fit <- lm(result~turnout, turnout_results18)
-# summary(fit)
-```
+Если есть какие-то мысли пишите мне в телеграм @vearlen.

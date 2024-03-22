@@ -9,9 +9,9 @@ website:
   navbar:
     left:
       - href: index.qmd
-        text: Текст
+        text: Основной текст
       - href: about.qmd
-        text: Карта
+        text: Черновик
 
 format:
   html:
