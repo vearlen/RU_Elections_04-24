@@ -5,6 +5,7 @@ execute:
   warning: false
 subtitle: "Как голосуют на российских выборах граждане РФ проживающие за границей"
 author: "Илья Тищенко"
+fig-responsive: false
 ---
 
 # Коротко
@@ -163,11 +164,11 @@ sum_voters <- total_voters %>%
 #| label: fig-turnout
 #| fig-cap: "Difference in turnout 2018 and 2024"
 #| fig-height: 9
-
-UIK_country_Loc_24 <- RU_total_UIK %>% 
-    filter(year %in% c(2024)) %>% 
-    mutate(Location = str_trim(Location)) %>%
-    distinct(UIK,en_country,Location)
+# 
+# UIK_country_Loc_24 <- RU_total_UIK %>% 
+#     filter(year %in% c(2024)) %>% 
+#     mutate(Location = str_trim(Location)) %>%
+#     distinct(UIK,en_country,Location)
 
 
 
@@ -175,7 +176,7 @@ df_turnout_18_24 <-
 RU_total_UIK %>% 
   filter(year %in% c(2018, 2024)) %>% 
   mutate(Location = str_trim(Location)) %>%
-  rows_patch(UIK_country_Loc_24,by=c("UIK",'en_country')) %>% 
+  # rows_patch(UIK_country_Loc_24,by=c("UIK",'en_country')) %>% 
   pivot_wider(id_cols = c(UIK,en_country,Location),
               names_from = year,values_from = total) %>% 
   mutate(diff = `2024`- `2018`, ratio = round(diff/`2018`*100,0)) %>% 
@@ -243,7 +244,6 @@ df_fake <- df_turnout_18_24 %>%
 df_cum_18_24 <- df_turnout_18_24 %>% 
   arrange(-total) %>% 
   mutate(cum_total = cumsum(total)) %>% 
-  # select(UIK,en_country,Location_Y,total,cum_total) %>% 
   mutate(cum_ratio = cum_total/380724,ratio = total/380724) 
 
 
@@ -317,7 +317,137 @@ cum_75plot(limit_ratio = 0.6)
 
 # Демографический состав голосующих
 
-Кол-во военных \> результат
+Среди избирателей за рубежом очень много военных частей или контролируемых Россией квазигосударств (Абхазия, Приднестровье), их результат на выборых обычно предсказуемо выше 70%, @fig-military_fig.
+
+```{r military_calc}
+
+RU_Pro_flag <- RU04_24 %>% 
+  distinct(UIK,year,Location,country,en_country) %>% 
+  mutate(Location = str_trim(Location)) %>%
+  mutate(ru_pro = case_when(
+    str_detect(Location,
+  'Миноб|ФСБ|батальон|ОКРМС|штаб|в/ч|Матросский|офицеров|ОШК|ДОФ|КСПМ|Батальон|Клуб 1472')~'Military',
+    str_detect(country,'Молда|Абха|Осет')~ "Military",
+    TRUE ~"Non military")) 
+
+RU04_24_PM <-
+  RU04_24 %>% 
+  filter(str_detect(Label,'Пу|Ме|yes')) %>% 
+  group_by(UIK,Location,en_country,year,region) %>% 
+  summarise(rat = mean(ratio), people = sum(number)) #%>%
+
+df_mlt <- RU04_24_PM %>% 
+  mutate(Location = str_trim(Location)) %>%
+  left_join(RU_Pro_flag,by=join_by(UIK,year,Location,en_country)) %>%
+  mutate(year = as.factor(year)) %>%
+  arrange(year) %>%
+  mutate(rat_bin = cut(rat,seq(0,100,by=5),right = TRUE)) %>% 
+  group_by(year,rat_bin,ru_pro) %>% 
+  summarise(people_bin = sum(people)) 
+  
+```
+
+```{r military_fig}
+#| label: fig-military_fig
+#| fig-cap: "Military controlled voters"
+#| fig-height: 9
+#| fig-align: 'left'
+g1 <- df_mlt %>%
+  ggplot(aes(
+    x = rat_bin,
+    fill = ru_pro,
+    text = paste0(
+      "Category: ",
+      rat_bin,
+      "<br>People: ",
+      people_bin,
+      "<br>",
+      ru_pro
+    )
+  )) +
+  geom_col(
+    aes(y = people_bin),
+    position = position_dodge2(preserve = 'single', padding = 0),
+    width = 0.7
+  ) +
+  scale_fill_manual(values = c('brown','#0084D7')) +
+  theme_minimal_hgrid(font_size = 10) +
+  facet_grid(year ~ .) +
+  labs(x = "votes for Putin %", y = "number of votes for Putin", fill =
+         "") +
+  scale_y_continuous(
+    breaks = c(0, 10000, 30000, 50000, 80000),
+    labels = c('0', '10K', '30k', '50K', '80K')
+  ) +
+  scale_x_discrete(
+    labels = c(
+      '10',
+      '',
+      '20',
+      '',
+      '30',
+      '',
+      '40',
+      '',
+      '50',
+      '',
+      '60',
+      '',
+      '70',
+      '',
+      '80',
+      '',
+      '90',
+      '',
+      '100'
+    )
+  ) +
+  theme(
+    legend.position = 'top',
+    axis.line = element_blank(),
+    panel.grid.major.y = element_line(
+      color = 'grey90',
+      linetype = 1,
+      linewidth = 0.01
+    ),
+    axis.title.y = element_text(margin = margin(0,20,0,0))
+  )
+
+
+
+ggplotly(g1,tooltip = 'text',width = 800) %>% layout(legend=list(orientation='h',xanchor='center',x=0.5,y=1.05))
+```
+
+```{r}
+#| fig-width: 7
+#| fig-height: 9
+# g1
+```
+
+У Важных историй получилось, что процент военных и квазигосударств [составляет 46%](https://istories.media/news/2024/03/18/bolee-46-golosov-za-putina-na-zarubezhnikh-territoriyakh-polucheno-v-podkontrolnikh-rossii-stranakh-i-voinskikh-chastyakh/), у меня вышло в районе 37% в 2024 @fig-mil_prop.
+
+```{r mil_prop}
+#| label: fig-mil_prop
+#| fig-cap: "Military controlled voters, %"
+g1 <- RU04_24_PM %>%
+  mutate(Location = str_trim(Location)) %>%
+  left_join(RU_Pro_flag,by=join_by(UIK,year,Location,en_country)) %>%
+  group_by(year,ru_pro) %>%
+  summarise(people = sum(people)) %>%
+  pivot_wider(id_cols = year,names_from = ru_pro,values_from = people) %>%
+  mutate(Y_N_ratio = `Military`/(`Military`+`Non military`)) %>% 
+  ggplot()+
+  geom_col(aes(x=year,y=Y_N_ratio),fill='brown')+
+  geom_text(aes(x=year,label=paste0(round(Y_N_ratio*100,0),"%"),y=Y_N_ratio*0.92),vjust = 1.5,color='grey99')+
+  theme_minimal_hgrid(font_size = 10)+
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1))+
+  labs(title="Military or controlled territories among voters abroad",x="",y="")+
+  scale_x_continuous(breaks = c(2004,2008,2012,2018,2020,2024))+
+  theme(axis.line = element_blank(),
+        axis.ticks = element_blank())
+
+g1
+```
 
 # Динамика голосования
 

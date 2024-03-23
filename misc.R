@@ -996,8 +996,8 @@ RU_Pro_flag <- RU04_24 %>%
     str_detect(country,'Молда|Абха|Осет')~ "Да",
     TRUE ~"Нет")) 
 
-tmp <- tibble(UIK=8236,Location='Гаага',ru_pro = "Нет",country = "Голландия",en_country = "Netherlands")
-RU_Pro_flag_upd <-    rows_update(RU_Pro_flag,tmp,by = c('UIK','Location'))
+# tmp <- tibble(UIK=8236,Location='Гаага',ru_pro = "Нет",country = "Голландия",en_country = "Netherlands")
+# RU_Pro_flag_upd <-    rows_update(RU_Pro_flag,tmp,by = c('UIK','Location'))
 
 # histogram ---------------------------------------------------------------
 RU04_24_PM <-
@@ -1006,34 +1006,39 @@ RU04_24_PM <-
   group_by(UIK,Location,en_country,year,region) %>% 
   summarise(rat = mean(ratio), people = sum(number)) #%>%
 
-RU04_24_PM %>% 
+df_mlt <- RU04_24_PM %>% 
   mutate(Location = str_trim(Location)) %>%
   left_join(RU_Pro_flag,by=join_by(UIK,year,Location,en_country)) %>%
   mutate(year = as.factor(year)) %>%
   arrange(year) %>%
   mutate(rat_bin = cut(rat,seq(0,100,by=5),right = TRUE)) %>% 
   group_by(year,rat_bin,ru_pro) %>% 
-  summarise(people_bin = sum(people)) %>% 
-  # View()
-  # filter(year==2004) %>%
-  ggplot(aes(x=rat_bin,fill=ru_pro))+
-  # geom_density()+
-  # geom_point(aes(y=people_bin),size=4)+
-  geom_col(aes(y=people_bin),position=position_dodge2(preserve = 'single',padding = 0),width=0.5)+
-  # geom_bar(bin=5,aes(weight=people))+
+  summarise(people_bin = sum(people)) #%>% 
+  pivot_wider(id_cols = c(year,rat_bin),names_from = ru_pro,values_from = people_bin)
+
+
+g1 <- df_mlt %>% 
+  ggplot(aes(x=rat_bin,fill=ru_pro,
+             text = paste0("Category:",rat_bin,
+                           "<br>People:", people_bin,
+                           "<br>",ru_pro)))+
+  geom_col(aes(y=people_bin),
+           position=position_dodge2(preserve = 'single',padding = 0),width=0.3)+
   scale_fill_manual(values = c('brown','#0084D7'))+
-  # geom_histogram(position = "dodge",alpha=0.7,binwidth = 2)+
   theme_minimal_hgrid(font_size = 10)+
   facet_grid(year~.)+
-  labs(x="процент за Путина, %", y= "голосов за Путина",fill="Военные и т.п.")+
+  labs(x="процент за Путина, %", y= "голосов за Путина",fill="Военные:")+
   scale_y_continuous(breaks = c(10000,30000,50000,80000),
                      labels = c('10K','30k','50K','80K'))+
    scale_x_discrete(labels = c('10','','20','','30','','40','','50','','60',
                                 '','70','','80','','90','','100'))+
   theme(legend.position = 'top',
-        axis.line = element_blank())
+        axis.line = element_blank(),
+        panel.grid.major.y = element_line(color='grey',linewidth=0.01))
 
 
+
+ggplotly(g1,tooltip = 'text')
 
 # calc military proportion 
 RU04_24_PM %>%
@@ -1072,9 +1077,6 @@ RU04_24 %>%
 
 
 # misc --------------------------------------------------------------------
-
-
-RU_total_UIK %>%
-  dplyr::group_by(UIK, en_country, Location, year) %>%
-  dplyr::summarise(n = dplyr::n(), .groups = "drop") %>%
-  dplyr::filter(n > 1L)
+RU04_24 %>% 
+  filter(en_country=="Israel", year==2024) %>% 
+  View()
