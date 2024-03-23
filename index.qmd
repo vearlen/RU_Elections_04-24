@@ -44,9 +44,9 @@ pu <- tibble(year=c(2004,2008,2012,2018,2020, 2024),
 
 ```{r total voters function}
 #| label: fig-total_voters
-#| fig-cap: "Общее кол-во проголосовавших"
+#| fig-cap: "Turnout abroad for Russian elections"
 
-total_voters <- function(sel_region = NA, sel_country = NA){
+total_voters_fn <- function(sel_region = NA, sel_country = NA){
   if(is.na(sel_region)){
     sel_region = all_of(RU04_24$region)
     sel_region_label = NULL
@@ -77,27 +77,26 @@ total_voters <- function(sel_region = NA, sel_country = NA){
     geom_text(aes(label=total,y=total*0.84),vjust = 1.5,color='grey99',size=3)+
     coord_flip()+
     theme_cowplot()+
-    theme_minimal_grid(font_size = 9)+
-    labs(y="",x="",fill="",title=paste0("Количество проголосовавших за рубежом ",sel_region_label,"  ",sel_country_label),
-         subtitle= "Кол-во проголосовавших за рубежом")+
-    scale_x_continuous(breaks = c(2024,2020,2018,2012,2008, 2004))+
-    scale_y_continuous(labels = scales::comma)+
+    theme_minimal_vgrid(font_size = 9)+
+    labs(y="",x="",fill="",title=paste0("Turnout abroad Russia ",sel_region_label,"  ",sel_country_label),
+         subtitle= "")+
+    scale_x_continuous(breaks = c(2024,2020,2018,2012,2008, 2004),
+                       expand = expansion(0.1,0))+
+    scale_y_continuous(labels = scales::comma,expand = expansion(0.01,0.2))+
     theme(legend.position = 'top',
-          axis.line.x = element_blank(),
+          axis.line = element_blank(),
           axis.ticks.x = element_blank(),
-          plot.subtitle = element_text(size=10,color='grey90',hjust=1))
+          plot.subtitle = element_text(size=10,color='grey90',hjust=1),
+          axis.ticks = element_blank())
   # g1
   ggplotly(g1)
 }
-total_voters()
+total_voters_fn()
 ```
 
-Тем не менее, как и многие я видел огромные очереди в избирательные участки в Вене, [Берлине](https://youtu.be/JmQw0TTWopU?si=JmhoYO32GIe0qt16), [Париже](https://www.youtube.com/live/FfY5mVx6Ir8?si=2w4nwVIF3_f40x3a&t=1688), Лондоне и [прочих](https://youtu.be/PdUrk4EEZUk?si=zWqv3t0ERDLsFteK) [городах](https://youtu.be/MMVJ-81B_h0?si=2CYBKrxQgn0TA_Xp). Как изменилась явка на зарубежных участках? На @fig-turnout по оси Х показано изменение явки в 2024 по сравнению с 2018, положительные значения - людей пришло больше, размер точки - общее кол-во людей пришедших на участок.
+Тем не менее, как и многие я видел огромные очереди в избирательные участки в Вене, [Берлине](https://youtu.be/JmQw0TTWopU?si=JmhoYO32GIe0qt16), [Париже](https://www.youtube.com/live/FfY5mVx6Ir8?si=2w4nwVIF3_f40x3a&t=1688), Лондоне и [прочих](https://youtu.be/PdUrk4EEZUk?si=zWqv3t0ERDLsFteK) [городах](https://youtu.be/MMVJ-81B_h0?si=2CYBKrxQgn0TA_Xp). Как изменилась явка на зарубежных участках? На @fig-turnout по оси Х показано изменение явки в 2024 по сравнению с 2018, положительные значения - людей пришло больше 2024, размер точки - общее кол-во людей пришедших на участок.
 
-```{r turnout}
-#| label: fig-turnout
-#| fig-cap: "Разница в явке между 2018 и 2024 годом"
-#| fig-height: 9
+```{r turnout_calc}
 RU_total_UIK <- RU04_24 %>% 
   filter(Label %in% c("Число недействительных избирательных бюллетеней",
                       "Число действительных избирательных бюллетеней","Ballots.in.box")) %>% 
@@ -158,13 +157,29 @@ sum_voters <- total_voters %>%
          against_ratio = against_total/total) %>% 
   mutate(gov_flag = if_else(gov_ratio > 0.5, "Y","N"))
 
+```
+
+```{r turnout_fig}
+#| label: fig-turnout
+#| fig-cap: "Difference in turnout 2018 and 2024"
+#| fig-height: 9
+
+UIK_country_Loc_24 <- RU_total_UIK %>% 
+    filter(year %in% c(2024)) %>% 
+    mutate(Location = str_trim(Location)) %>%
+    distinct(UIK,en_country,Location)
+
+
+
 df_turnout_18_24 <- 
 RU_total_UIK %>% 
   filter(year %in% c(2018, 2024)) %>% 
   mutate(Location = str_trim(Location)) %>%
-  pivot_wider(id_cols = c(UIK,en_country,Location),names_from = year,values_from = total) %>% 
+  rows_patch(UIK_country_Loc_24,by=c("UIK",'en_country')) %>% 
+  pivot_wider(id_cols = c(UIK,en_country,Location),
+              names_from = year,values_from = total) %>% 
   mutate(diff = `2024`- `2018`, ratio = round(diff/`2018`*100,0)) %>% 
-  filter(!is.na(ratio)) %>% 
+  filter(!is.na(`2024`)) %>%
   left_join(filter(sum_voters,year==2024)) %>% 
   mutate(Location = if_else(is.na(Location),paste0(en_country,'-',as.character(UIK)),Location)) %>% 
   arrange(Location) %>% 
@@ -177,41 +192,135 @@ pal <- c('brown','#0084D7')
 pal <- setNames(pal,c('Y','N'))
 p <-
   plot_ly(
-    df_turnout_18_24,
+    df_turnout_18_24 %>% 
+      filter(!is.na(ratio)),
     y = ~ reorder(Location_Y, -ratio),
     x = ~ ratio,
     size = ~ `2024`,
     alpha = 0.6,
     color = ~ gov_flag,
     colors=pal,
-    text = ~paste("Страна: ",en_country,
-                  '<br>УИК: ', Location_Y,'/',UIK,
-                  '<br>Пришло',
+    text = ~paste("Country: ",en_country,
+                  '<br>Location: ', Location_Y,'/',UIK,
+                  '<br>Turnout',
                   '<br>  \'18:',`2018`,
                   '<br>  \'24:',`2024` ,
-                  '<br>разница: ', ratio,
-                  '%<br>за Путина: ',round(gov_ratio*100,0),'%'),
+                  '<br>Difference: ', ratio,
+                  '%<br>for Putin: ',round(gov_ratio*100,0),'%'),
     hoverinfo = 'text'
   ) %>% 
   add_markers(sizes = c(30,1000))
 
-p %>% layout(yaxis=list(title=""),xaxis=list(title="Разница в количестве людей 2018 и 2024 гг., %"),legend = list(orientation = 'h',title = list(text = "За Путина?"),y = 1,x=0.2))
+p %>% layout(yaxis=list(title=""),xaxis=list(title="Difference in turnout 2018-2024, %"),legend = list(orientation = 'h',title = list(text = "Putin won?"),y = 1,x=0.2))
 ```
 
-Пропускная способность
+```{r sum_ratio_calc}
+total_sum <- total_voters %>% group_by(year) %>% summarize(sum = sum(total))
+total_gov <- gov_voters %>% group_by(year) %>% summarise(sum_gov = sum(gov_total))
+
+df_fake <- df_turnout_18_24 %>%
+  filter(ratio > 506) %>%
+  distinct(UIK) %>%
+  left_join(gov_voters) %>%
+  left_join(sum_voters) %>%
+  filter(year==2024) %>% 
+  left_join(total_sum) %>% 
+  left_join(total_gov) %>% 
+  mutate(ratio_total = total/sum,ratio_gov = gov_total/sum_gov) %>% 
+  select(UIK,ratio_total,ratio_gov) %>% 
+  summarise(sum_ratio = sum(ratio_total),sum_ratio_gov = sum(ratio_gov))
+```
+
+В глаза бросаются пять участков справа: Анкара, Молдова, Бангладеш, Кипр и Египет. В них положительная разница в явке более 500%. Суммарно эти участки дают `r round(df_fake$sum_ratio*100,0)` % всех голосов.
+
+Пропускная способность в Зальцбурге была `r round(1437/13/3,0)` человека на одного человека в комисии в час, в Вене `r round(2278/13/6,0)`. Если предположить что скорость в Зальцбурге нормальная, то по количеству проголосовавших людей можно предположить где могли произойти вбросы. На @fig-cum_ratio показаны участки составляющие 60% всех голосующих.
+
+```{r cum_ratio}
+#| label: fig-cum_ratio
+#| fig-cap: "Locations with 60% contribution to total voters"
+#| fig-height: 6
+#| 
+df_cum_18_24 <- df_turnout_18_24 %>% 
+  arrange(-total) %>% 
+  mutate(cum_total = cumsum(total)) %>% 
+  # select(UIK,en_country,Location_Y,total,cum_total) %>% 
+  mutate(cum_ratio = cum_total/380724,ratio = total/380724) 
+
+
+cum_75plot <-  function(el_year=2024,limit_ratio = 0.75){
+  g1 <- df_cum_18_24 %>%
+    filter(cum_ratio <= limit_ratio) %>%
+    filter(year == el_year) %>%
+    ggplot(aes(
+      text = paste0(
+        "Country: ",
+        en_country,
+        "<br>People voted: ",
+        total,
+        "<br>From all: ",
+        round(ratio*100, 1),
+        "%",
+        "<br>Cumulative: ",
+        round(cum_ratio * 100, 1),
+        "%",
+        "<br>Putin result: ",
+        round(gov_ratio * 100, 0),
+        "%"
+      )
+    )) +
+    geom_col(aes(
+      y = ratio,
+      x = reorder(Location_Y, -ratio),
+      fill = gov_flag
+    )) +
+    geom_line(
+      aes(
+        y = cum_ratio,
+        group = 1,
+        x = reorder(Location_Y, -ratio)
+      ),
+      color = 'grey20',
+      linewidth = 0.1
+    ) +
+    geom_point(
+      aes(y = cum_ratio, x = reorder(Location_Y, -ratio)),
+      color = 'grey20',
+      size = 1.5,
+      alpha = 0.6
+    ) +
+    theme_minimal_hgrid() +
+    labs(y = "Percent from all voters", 
+         x = "", 
+         title = "Locations with total amount of 60% from all voters",
+         fill = "Putin won?") +
+    scale_y_continuous(labels = scales::percent_format(accuracy = 1),
+                       expand = expansion(0.01, 0)) +
+    theme(
+      axis.text.x = element_text(
+        angle = 90,
+        size = 9,
+        color = 'grey40'
+      ),
+      axis.line = element_blank(),
+      axis.ticks = element_blank(),
+      axis.text.y = element_text(size = 9, color = 'grey40'),
+      title = element_text(size = 12, color = 'grey20'),
+      axis.title = element_text(size = 10, color = 'grey30')
+    )
+         
+
+ggplotly(g1,tooltip = 'text')
+}
+cum_75plot(limit_ratio = 0.6)
+
+```
 
 # Демографический состав голосующих
 
 Кол-во военных \> результат
-
-Вбросы
 
 # Динамика голосования
 
 Изменение распределения
 
 Кто пришел когда, кто придет в 2030?
-
-# Данные
-
-Если есть какие-то мысли пишите мне в телеграм @vearlen.

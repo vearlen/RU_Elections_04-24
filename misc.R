@@ -383,8 +383,9 @@ if(ratio){
 voters_total()
 voters_total(sel_country = 'Austria',ratio=FALSE)
 voters_total(sel_country = 'Armenia',ratio=FALSE)
-voters_total(sel_country = 'Malta',ratio=FALSE)
-voters_total(sel_country = 'Israel')
+voters_total(sel_country = 'Croatia',ratio=FALSE)
+voters_total(sel_country = 'Iran',ratio=FALSE)
+voters_total(sel_country = 'Israel', ratio=FALSE)
 voters_total(sel_country = 'Malta')
 voters_total(sel_country = 'Germany')
 voters_total(sel_region = 'Europe')
@@ -1059,3 +1060,21 @@ RU04_24_PM %>%
 
 
 # write.csv('Data/all_UIKs.csv',row.names = FALSE)
+
+
+RU04_24 %>% 
+  filter(year %in% c(2012,2024), en_country=="Israel") %>% 
+  distinct(year,UIK) %>% 
+  # mutate(UIK = as.character(UIK)) %>%
+  group_by(year) %>%
+  summarise(xx = n(year))
+
+
+
+# misc --------------------------------------------------------------------
+
+
+RU_total_UIK %>%
+  dplyr::group_by(UIK, en_country, Location, year) %>%
+  dplyr::summarise(n = dplyr::n(), .groups = "drop") %>%
+  dplyr::filter(n > 1L)
