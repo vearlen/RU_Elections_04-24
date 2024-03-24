@@ -321,14 +321,15 @@ cum_75plot(limit_ratio = 0.6)
 
 ```{r military_calc}
 
-RU_Pro_flag <- RU04_24 %>% 
-  distinct(UIK,year,Location,country,en_country) %>% 
+RU_Pro_flag <- RU04_24 %>%
+  distinct(UIK,year,Location,country,en_country) %>%
   mutate(Location = str_trim(Location)) %>%
   mutate(ru_pro = case_when(
     str_detect(Location,
   'Миноб|ФСБ|батальон|ОКРМС|штаб|в/ч|Матросский|офицеров|ОШК|ДОФ|КСПМ|Батальон|Клуб 1472')~'Military',
     str_detect(country,'Молда|Абха|Осет')~ "Military",
-    TRUE ~"Non military")) 
+    UIK == 8027  ~ "Military",
+    TRUE ~"Non military"))
 
 RU04_24_PM <-
   RU04_24 %>% 
@@ -451,6 +452,485 @@ g1
 
 # Динамика голосования
 
-Изменение распределения
+Рассматривая данные с 2004 года, можно обратить внимание, что в 2012 было довольно много стран где результат Путина был ниже 50%. В 2018 таких стран не было, в 20-ом и 24-ом снова распределение стало более широким @fig-how_voted_gif, @fig-voted_putin
+
+```{r}
+RU04_24_PM <-
+  RU04_24 %>% 
+  filter(str_detect(Label,'Пу|Ме|yes')) %>% 
+  group_by(en_country,year,region) %>% 
+  summarise(rat = mean(ratio), people = sum(number))
+```
+
+[![Amount of people vs results for Putin](out/elec_04_24_country.gif){#fig-how_voted_gif fig-align="center"}](fig-how_voted_gif)
+
+```{r fig non-animated}
+#| label: fig-voted_putin
+#| fig-cap: "Amount of people vs result for Putin"
+#| 
+g1 <- RU04_24_PM %>%
+  ggplot(aes(x=people,y=rat,color=region,text=paste0(en_country,"<br>Votes: ",people,
+                                                     "<br>Putin: ",round(rat),"%")))+
+  geom_point(alpha = 0.7, size=2)+
+  scale_x_log10()+
+  theme_minimal(base_size = 10)+
+  panel_border()+
+  labs(title = "",
+       y = "votes for Putin, %",
+       x = "Amount of people, log scale",
+       color ="")+
+  facet_grid(~year)
+
+ggplotly(g1,tooltip = 'text') %>% layout(legend = list(orientation='h'))
+```
+
+Особенностью этих выборов стало не увеличение явки, она не особо выросла, учитывая закрывшиеся участки, а то что количество про-Путинских избирателей стало меньше, а протестных избирателей пришло больше. Это видно как на общих данных
+
+```{r}
+voters_total <- function(sel_region = NA, sel_country = NA, ratio=TRUE,plotly_plot = FALSE){
+  
+  if(is.na(sel_region)){
+    sel_region = all_of(RU04_24$region)
+    sel_region_label = "all regions"
+      if(!is.na(sel_country)){sel_region_label = NULL}
+  }  else {
+    sel_region
+    sel_region_label = sel_region
+  }
+  
+  if(is.na(sel_country)){
+    sel_country = all_of(RU04_24$en_country) 
+    sel_country_label = NULL
+  } else {
+    sel_country
+    sel_country_label = sel_country
+  }  
+  
+  total_voters <- RU04_24 %>% 
+    filter(region %in% c(sel_region)) %>% 
+    filter(en_country %in% c(sel_country)) %>%
+    filter(Label %in% c("Число недействительных избирательных бюллетеней",
+                        "Число действительных избирательных бюллетеней","Ballots.in.box")) %>% 
+    group_by(year) %>% 
+    summarise(total = sum(number))
+  
+  
+  
+  gov_voters <- RU04_24 %>% 
+    filter(region %in% c(sel_region)) %>%
+    filter(en_country %in% c(sel_country)) %>%
+    filter(Label %in% c("yes",
+                        "Путин Владимир Владимирович",
+                        "Медведев Дмитрий Анатольевич"
+    )) %>%
+    group_by(year) %>% 
+    summarize(gov_total = sum(number))
+  
+  reject_voters <- RU04_24 %>% 
+    filter(region == sel_region) %>%
+    filter(en_country %in% c(sel_country)) %>%
+    filter(Label %in% c("Rejected.ballots",
+                        "Число недействительных избирательных бюллетеней")) %>% 
+    group_by(year) %>% 
+    summarize(reject_total = sum(number))
+  
+  against_voters <- RU04_24 %>% 
+    filter(region %in% c(sel_region)) %>%
+    filter(en_country %in% c(sel_country)) %>%
+    filter(Label %in% c("Глазьев Сергей Юрьевич",
+                        "Против всех",
+                        "Малышкин Олег Александрович",
+                        "Миронов Сергей Михайлович",
+                        "Хакамада Ирина Муцуовна",
+                        "Харитонов Николай Михайлович",
+                        "Богданов Андрей Владимирович",
+                        "Жириновский Владимир Вольфович",
+                        "Зюганов Геннадий Андреевич",
+                        "Прохоров Михаил Дмитриевич",
+                        "Бабурин Сергей Николаевич",
+                        "Грудинин Павел Николаевич",
+                        "Собчак Ксения Анатольевна",
+                        "Сурайкин Максим Александрович",
+                        "Титов Борис Юрьевич",
+                        "Явлинский Григорий Алексеевич",
+                        "Даванков Владислав Андреевич",
+                        "Слуцкий Леонид Эдуардович",
+                        "Харитонов Николай Михайлович",
+                        "no")) %>% 
+    group_by(year) %>% 
+    summarize(against_total = sum(number))
+  
+  
+  sum_voters <- total_voters %>% 
+    left_join(gov_voters) %>% 
+    left_join(reject_voters) %>% 
+    left_join(against_voters) %>% 
+    mutate(gov_ratio = gov_total/total,
+           reject_ratio = reject_total/total,
+           against_ratio = against_total/total)
+  
+  
+  
+  sum_tmp <-  sum_voters %>% 
+    select(year,gov_total,reject_total,against_total) %>% 
+    pivot_longer(-year,names_to = "category",values_to = 'ratio') %>% 
+    mutate(category = case_when(
+      category == "gov_total" ~ "pro P",
+      category == "against_total" ~ "against P",
+      category == "reject_total" ~ "spoiled ballot",
+      TRUE~category
+    )) %>% 
+    mutate(category = fct_relevel(category,'against P','spoiled ballot','pro P'))
+  
+pro_p_label <-
+  sum_tmp %>% 
+  filter(year != 2020) %>% 
+  pivot_wider(id_cols = year,names_from = category,values_from = ratio) %>% 
+  mutate(pro_p_label = `pro P` - dplyr::lag(`pro P`), 
+         pro_p_x = (year - 1.5),
+         pro_p_y = `pro P`,
+         against_p_label = (`against P`+`spoiled ballot`) - 
+                            (dplyr::lag(`spoiled ballot`)+dplyr::lag(`against P`)), 
+         against_p_x = (year - 1.5),
+         against_p_y = (`against P`+`pro P`+`spoiled ballot`)) %>% 
+  mutate(seg_x = if_else(year>2004,year-1,NA),
+         seg_xend = if_else(year>2004,year,NA)) %>% 
+  rowwise() %>% 
+  mutate(total = sum(`pro P`+`spoiled ballot`+`against P`)) %>% 
+  mutate(pro_r = round(`pro P`/total,2),
+         against_r = round(`against P`/total,2),
+         spoiled_r = round(`spoiled ballot`/total,2)) %>% 
+  mutate(mid_pro_y = `pro P`/2,
+         mid_against_y = (`pro P`+`spoiled ballot` + `against P`)-(`against P`/2),
+         mid_spoiled_y = (`pro P`+`spoiled ballot`)-(`spoiled ballot`/2))
+  
+
+# static plot with deltas
+ g1 <-  sum_tmp %>% 
+   filter(year != 2020) %>%
+    ggplot()+
+   geom_segment(
+     data = pro_p_label,
+     aes(
+       x = seg_x,
+       y = `pro P`,
+       xend = seg_xend,
+       yend = `pro P`
+     ),
+     color = 'brown',
+     linewidth = 0.5
+   ) +
+   geom_segment(
+     data = pro_p_label,
+     aes(
+       x = seg_x,
+       y = against_p_y*0.99,
+       xend = seg_xend,
+       yend = against_p_y*0.99
+     ),
+     color = '#0084D7',
+     linewidth = 0.5
+   ) +
+   geom_col(aes(x=year,y=ratio,fill=category), width = 0.8)+
+    
+    scale_fill_manual(values = c("pro P" = '#8c190f',
+                                 "against P" = '#0084D7',
+                                 "spoiled ballot" = '#005082'),
+                      breaks = c("pro P",
+                                 "against P",
+                                 "spoiled ballot" ),
+                      labels = c("pro P",
+                                 "against P",
+                                 "spoiled ballot" ))+
+    theme_cowplot()+
+    theme_minimal_hgrid()+
+   # legends
+   annotate(
+     geom = 'text',
+     x = 2020,
+     y = pro_p_label$against_p_y[5]*1.26,
+     label = "Year-Year difference
+including spoiled",
+     hjust=0,
+     size=3.5,
+     color='#0084D7'
+   )+
+   annotate(
+     'curve',
+     x = 2020, # Play around with the coordinates until you're satisfied
+     y = pro_p_label$against_p_y[5]*1.16,
+     yend = pro_p_label$against_p_y[5]*0.99,
+     xend = 2021.6,
+     linewidth = 0.3,
+     color='#0084D7',
+     curvature = 0.1,
+     arrow = arrow(length = unit(0.1, 'cm'))
+   )+
+  # pro rus difference  
+   geom_label(
+     data = pro_p_label,
+     aes(x = pro_p_x, y = pro_p_y, label = pro_p_label),
+     fill = '#8c190f',
+     color = 'white',
+     vjust=1,
+     size=3.5,
+   )+
+   # protest difference
+   geom_label(
+     data = pro_p_label,
+     aes(x = against_p_x, y = against_p_y, label = against_p_label),
+     fill = '#0084D7',
+     color = 'white',
+     vjust=1,
+     size=3.5
+   )+
+   # total number
+   geom_text(
+     data = pro_p_label,
+     aes(x = year, y = total, label = total),
+     size = 4,
+     color = 'grey50',
+     vjust=-0.2
+   )+
+   # ratios
+   geom_text(
+     data = pro_p_label,
+     aes(
+       x = year,
+       y = mid_pro_y,
+       label = paste0(pro_r * 100, "%")
+     ),
+     angle = 90,
+     size = 2.8,
+     color = 'grey80'
+   ) +
+   geom_text(
+     data = pro_p_label,
+     aes(
+       x = year,
+       y = mid_against_y,
+       label = ifelse(against_r < 0.05, '', paste0(against_r *
+                                                     100, "%"))
+     ),
+     angle = 90,
+     size = 2.8,
+     color = 'grey80'
+   ) +
+   geom_text(
+     data = pro_p_label,
+     aes(
+       x = year,
+       y = mid_spoiled_y,
+       label = ifelse(spoiled_r < 0.05, '', paste0(spoiled_r *
+                                                     100, "%"))
+     ),
+     angle = 90,
+     size = 2.8,
+     color = 'grey80'
+   ) +
+   labs(y="people",x="",fill="",
+         title=paste0("Russians voted in ",sel_region_label,"  ",sel_country_label))+
+    theme(legend.position = 'top',
+          axis.line.x = element_blank(),
+          axis.ticks.x = element_blank(),
+          panel.grid = element_line(color='grey70',linewidth = 0.1))+
+          scale_x_continuous(breaks = c(2004,2008,2012,2018,2024))
+    
+ # g1
+ 
+ g2 <- sum_tmp %>% 
+    ggplot()+
+    geom_bar(aes(x=year,
+                 y=ratio,
+                 fill=category), 
+                 position = 'fill',
+                 stat = 'identity'
+                )+
+    geom_point(data = pu,
+               aes(x=year,y=rat_dec),
+               size = 4,
+               alpha = 0.9,
+               color = 'yellow'
+    ) +
+    scale_fill_manual(values = c("pro P" = '#8c190f',
+                                 "against P" = '#0084D7',
+                                 "spoiled ballot" = '#005082'),
+                      breaks = c("pro P",
+                                 "against P",
+                                 "spoiled ballot" ),
+                      labels = c("pro P",
+                                 "against P",
+                                 "spoiled ballot" ))+
+    theme_cowplot()+
+    theme_minimal_hgrid()+
+    scale_y_continuous(labels = scales::percent_format(accuracy = 1))+
+    labs(y="%",x="",fill="",title=paste0("Russians voted in ",sel_region_label," ",sel_country_label),
+         subtitle="Official results, \"Russian\" official results with yellow dot")+
+    theme(legend.position = 'top',
+          axis.line.x = element_blank(),
+          axis.ticks.x = element_blank())+
+    scale_x_continuous(breaks = c(2004,2008,2012,2018,2020,2024))
+  
+if(ratio){ 
+  if(plotly_plot){
+  ggplotly(g2) %>%  
+    plotly::layout(legend=list(x=0, 
+                               xanchor='left',
+                               yanchor='top',
+                               orientation='h'))
+    }else{g2}
+  
+}else{
+  if(plotly_plot){ggplotly(g1) %>%  
+    plotly::layout(legend=list(x=0, 
+                               xanchor='left',
+                               yanchor='top',
+                               orientation='h'))
+}else{g1}}
+}
+
+voters_total(ratio=FALSE)
+
+
+```
+
+Так и на европейских.
+
+```{r}
+voters_total(sel_region = 'Europe',ratio=FALSE)
+```
+
+```{r}
+total_voters <- RU04_24 %>% 
+
+  filter(Label %in% c("Число недействительных избирательных бюллетеней",
+                      "Число действительных избирательных бюллетеней","Ballots.in.box")) %>% 
+  group_by(year,en_country) %>% 
+  summarise(total = sum(number))
+
+gov_voters <- RU04_24 %>% 
+  filter(Label %in% c("yes",
+                      "Путин Владимир Владимирович",
+                      "Медведев Дмитрий Анатольевич"
+  )) %>%
+  group_by(year,en_country) %>% 
+  summarize(gov_total = sum(number))
+
+reject_voters <- RU04_24 %>% 
+  filter(Label %in% c("Rejected.ballots",
+                      "Число недействительных избирательных бюллетеней")) %>% 
+  group_by(year,en_country) %>% 
+  summarize(reject_total = sum(number))
+
+against_voters <- RU04_24 %>% 
+  filter(Label %in% c("Глазьев Сергей Юрьевич",
+                      "Против всех",
+                      "Малышкин Олег Александрович",
+                      "Миронов Сергей Михайлович",
+                      "Хакамада Ирина Муцуовна",
+                      "Харитонов Николай Михайлович",
+                      "Богданов Андрей Владимирович",
+                      "Жириновский Владимир Вольфович",
+                      "Зюганов Геннадий Андреевич",
+                      "Прохоров Михаил Дмитриевич",
+                      "Бабурин Сергей Николаевич",
+                      "Грудинин Павел Николаевич",
+                      "Собчак Ксения Анатольевна",
+                      "Сурайкин Максим Александрович",
+                      "Титов Борис Юрьевич",
+                      "Явлинский Григорий Алексеевич",
+                      "Даванков Владислав Андреевич",
+                      "Слуцкий Леонид Эдуардович",
+                      "Харитонов Николай Михайлович",
+                      "no")) %>% 
+  group_by(year,en_country) %>% 
+  summarize(against_total = sum(number))
+
+
+sum_voters <- total_voters %>% 
+  left_join(gov_voters) %>% 
+  left_join(reject_voters) %>% 
+  left_join(against_voters) %>% 
+  mutate(gov_ratio = gov_total/total,
+         reject_ratio = reject_total/total,
+         against_ratio = against_total/total)
+
+df_18_24_people_diff <- sum_voters %>% 
+group_by(en_country) %>% 
+  arrange(en_country,year) %>% 
+  filter(year!=2020) %>% 
+  mutate(gov_total_diff =gov_total - lag(gov_total),
+         against_total_diff = against_total - lag(against_total),
+         reject_total_diff = reject_total - lag(reject_total),
+         ag_rej_diff = against_total_diff + reject_total_diff,
+         gov_ratio= gov_total/total,
+         gov_flag = ifelse(gov_ratio>0.5,"Y","N")) %>% 
+  select(year,en_country,gov_total_diff,reject_total,against_total_diff,ag_rej_diff,gov_flag) %>% 
+  filter(year==2024) %>% 
+  mutate(mymean = mean(c(gov_total_diff,ag_rej_diff))) %>% 
+  arrange(mymean) %>% 
+  mutate(en_country = factor(en_country,en_country))
+
+
+df_12_18_people_diff <- sum_voters %>% 
+group_by(en_country) %>% 
+  arrange(en_country,year) %>% 
+  filter(year!=2020) %>% 
+  mutate(gov_total_diff =gov_total - lag(gov_total),
+         against_total_diff = against_total - lag(against_total),
+         reject_total_diff = reject_total - lag(reject_total),
+         ag_rej_diff = against_total_diff + reject_total_diff,
+         gov_ratio= gov_total/total,
+         gov_flag = ifelse(gov_ratio>0.5,"Y","N")) %>% 
+  select(year,en_country,gov_total_diff,reject_total,against_total_diff,ag_rej_diff,gov_flag) %>% 
+  filter(year==2018) %>% 
+  mutate(mymean = mean(c(gov_total_diff,ag_rej_diff))) %>% 
+  arrange(mymean) %>% 
+  mutate(en_country = factor(en_country,en_country))
+
+threshold <- 200
+# filter(df_18_24_people_diff, mymean > threshold || mymean < -threshold) %>% View()
+
+g1 <- ggplot(filter(df_18_24_people_diff, mymean > threshold || mymean < -threshold)) +
+  geom_segment( aes(x=reorder(en_country,mymean), xend=en_country, y=gov_total_diff, yend=ag_rej_diff,color=gov_flag),
+                linewidth=1) +
+  geom_point( aes(x=reorder(en_country,mymean), y=gov_total_diff,
+                  text=paste0(en_country,'<br>gov votes diff 18-24: ',gov_total_diff)), color='brown', size=3 ) +
+  geom_point( aes(x=reorder(en_country,mymean), y=ag_rej_diff,
+                  text=paste0(en_country,'<br>anti gov diff 18-24: ',ag_rej_diff)), color='#0084D7', size=2 ) +
+  coord_flip()+
+  scale_color_manual(values = c('#0084D7','brown'))+
+  theme_minimal_vgrid(font_size = 10)+
+  theme(
+    legend.position = "none",
+  ) +
+  xlab("") +
+  ylab("Difference in people")+
+  labs(title="Difference in votes 2018-2024")
+
+ggplotly(g1,tooltip = 'text')
+
+threshold2 <- 200
+g2 <- ggplot(filter(df_12_18_people_diff, mymean > threshold2 || mymean < -threshold2)) +
+  geom_segment( aes(x=reorder(en_country,mymean), xend=en_country, y=gov_total_diff, yend=ag_rej_diff,color=gov_flag),
+                linewidth=1) +
+  geom_point( aes(x=reorder(en_country,mymean), y=gov_total_diff,
+                  text=paste0(en_country,'<br>gov votes diff 12-18: ',gov_total_diff)), color='brown', size=3 ) +
+  geom_point( aes(x=reorder(en_country,mymean), y=ag_rej_diff,
+                  text=paste0(en_country,'<br>anti gov diff 12-18: ',ag_rej_diff)), color='#0084D7', size=2 ) +
+  coord_flip()+
+  scale_color_manual(values = c('brown','#0084D7'))+
+  theme_minimal_vgrid(font_size = 10)+
+  theme(
+    legend.position = "none",
+  ) +
+  xlab("") +
+  ylab("Difference in people")+
+  labs(title="Difference in votes 2012-2018")
+
+ggplotly(g2,tooltip = 'text')
+
+#subplot(g1,g2,nrows = 1) 
+```
 
 Кто пришел когда, кто придет в 2030?
