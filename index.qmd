@@ -352,26 +352,7 @@ df_mlt <- RU04_24_PM %>%
 <iframe title="Russian elections, 2004" aria-label="Stacked Bars" id="datawrapper-chart-EUK0C" src="https://datawrapper.dwcdn.net/EUK0C/1/" scrolling="no" frameborder="0" style="width: 0; min-width: 100% !important; border: none;" height="421" data-external="1"></iframe><script type="text/javascript">!function(){"use strict";window.addEventListener("message",(function(a){if(void 0!==a.data["datawrapper-height"]){var e=document.querySelectorAll("iframe");for(var t in a.data["datawrapper-height"])for(var r=0;r<e.length;r++)if(e[r].contentWindow===a.source){var i=a.data["datawrapper-height"][t]+"px";e[r].style.height=i}}}))}();
 </script>
 ```
-```{=html}
-<iframe title="Russian elections, 2008" aria-label="Stacked Bars" id="datawrapper-chart-MRymB" src="https://datawrapper.dwcdn.net/MRymB/1/" scrolling="no" frameborder="0" style="width: 0; min-width: 100% !important; border: none;" height="373" data-external="1"></iframe><script type="text/javascript">!function(){"use strict";window.addEventListener("message",(function(a){if(void 0!==a.data["datawrapper-height"]){var e=document.querySelectorAll("iframe");for(var t in a.data["datawrapper-height"])for(var r=0;r<e.length;r++)if(e[r].contentWindow===a.source){var i=a.data["datawrapper-height"][t]+"px";e[r].style.height=i}}}))}();
-</script>
-```
-```{=html}
-<iframe title="Russian elections, 2012" aria-label="Stacked Bars" id="datawrapper-chart-CCF4d" src="https://datawrapper.dwcdn.net/CCF4d/1/" scrolling="no" frameborder="0" style="width: 0; min-width: 100% !important; border: none;" height="541" data-external="1"></iframe><script type="text/javascript">!function(){"use strict";window.addEventListener("message",(function(a){if(void 0!==a.data["datawrapper-height"]){var e=document.querySelectorAll("iframe");for(var t in a.data["datawrapper-height"])for(var r=0;r<e.length;r++)if(e[r].contentWindow===a.source){var i=a.data["datawrapper-height"][t]+"px";e[r].style.height=i}}}))}();
-</script>
-```
-В 2018 есть подозрение, что какие-то военные части я не учел.
-
-```{=html}
-<iframe title="Russian elections, 2018" aria-label="Stacked Bars" id="datawrapper-chart-0PY3z" src="https://datawrapper.dwcdn.net/0PY3z/1/" scrolling="no" frameborder="0" style="width: 0; min-width: 100% !important; border: none;" height="421" data-external="1"></iframe><script type="text/javascript">!function(){"use strict";window.addEventListener("message",(function(a){if(void 0!==a.data["datawrapper-height"]){var e=document.querySelectorAll("iframe");for(var t in a.data["datawrapper-height"])for(var r=0;r<e.length;r++)if(e[r].contentWindow===a.source){var i=a.data["datawrapper-height"][t]+"px";e[r].style.height=i}}}))}();
-</script>
-```
-В 2024 году интервал начиная с 85 и выше либо вбросы (Кипр) либо военные.
-
-```{=html}
-<iframe title="Russian elections, 2024" aria-label="Stacked Bars" id="datawrapper-chart-IQiHM" src="https://datawrapper.dwcdn.net/IQiHM/1/" scrolling="no" frameborder="0" style="width: 0; min-width: 100% !important; border: none;" height="589" data-external="1"></iframe><script type="text/javascript">!function(){"use strict";window.addEventListener("message",(function(a){if(void 0!==a.data["datawrapper-height"]){var e=document.querySelectorAll("iframe");for(var t in a.data["datawrapper-height"])for(var r=0;r<e.length;r++)if(e[r].contentWindow===a.source){var i=a.data["datawrapper-height"][t]+"px";e[r].style.height=i}}}))}();
-</script>
-```
+В 2018 есть подозрение, что какие-то военные части я не учел. В 2024 году интервал начиная с 85 и выше либо вбросы (Кипр) либо военные, что отражает последние выборы даже за рубежом.
 
 ```{r military_fig}
 #| label: fig-military_fig
