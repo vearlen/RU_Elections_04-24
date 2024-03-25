@@ -608,8 +608,9 @@ group_by(en_country) %>%
   arrange(mymean) %>% 
   mutate(en_country = factor(en_country,en_country))
 
-threshold <- 200
-filter(df_18_24_people_diff, mymean > threshold || mymean < -threshold) %>% View()
+threshold <- 600
+filter(df_18_24_people_diff, mymean > threshold || mymean < -threshold) %>% 
+  write.csv('out/diff_18-24.csv',row.names = FALSE)
 
 g1 <- ggplot(filter(df_18_24_people_diff, mymean > threshold || mymean < -threshold)) +
   geom_segment( aes(x=reorder(en_country,mymean), xend=en_country, y=gov_total_diff, yend=ag_rej_diff,color=gov_flag),
@@ -630,7 +631,10 @@ g1 <- ggplot(filter(df_18_24_people_diff, mymean > threshold || mymean < -thresh
 
 ggplotly(g1,tooltip = 'text')
 
-threshold2 <- 200
+threshold2 <- 600
+filter(df_12_18_people_diff, mymean > threshold || mymean < -threshold) %>% 
+  write.csv('out/diff_12-18.csv',row.names = FALSE)
+
 g2 <- ggplot(filter(df_12_18_people_diff, mymean > threshold2 || mymean < -threshold2)) +
   geom_segment( aes(x=reorder(en_country,mymean), xend=en_country, y=gov_total_diff, yend=ag_rej_diff,color=gov_flag),
                 linewidth=1) +
@@ -776,8 +780,8 @@ animate(g1,
   end_pause = 20,
   start_pause = 1,
   nframes = 100,
-  height = 800,
-  width = 800,
+  height = 700,
+  width = 700,
   units = "px")
 
 
@@ -1079,6 +1083,27 @@ RU_total_UIK <- RU04_24 %>%
   group_by(UIK,year,en_country,Location) %>% 
   summarise(total = sum(number)) 
 
+df_turnout_18_24 <- 
+  RU_total_UIK %>% 
+  filter(year %in% c(2018, 2024)) %>% 
+  mutate(Location = str_trim(Location)) %>%
+  # rows_patch(UIK_country_Loc_24,by=c("UIK",'en_country')) %>% 
+  pivot_wider(id_cols = c(UIK,en_country,Location),
+              names_from = year,values_from = total) %>% 
+  mutate(diff = `2024`- `2018`, ratio = round(diff/`2018`*100,0)) %>% 
+  filter(!is.na(`2024`)) %>%
+  left_join(filter(sum_voters,year==2024)) %>% 
+  mutate(Location = if_else(is.na(Location),paste0(en_country,'-',as.character(UIK)),Location)) %>% 
+  arrange(Location) %>% 
+  ungroup() %>% 
+  mutate(Location_Y = if_else(Location == lag(Location),paste0(Location,'-',as.character(UIK)),Location)) %>% 
+  mutate(Location_Y = if_else(is.na(Location_Y),Location,Location_Y))
+
+df_turnout_18_24 %>% 
+  filter(!is.na(ratio)) %>% 
+  filter(ratio %in% c(min(ratio):-80,80:max(ratio))) %>% 
+  arrange(ratio) %>% 
+  write.csv('out/df_turnout18-24.csv',row.names = FALSE)
 
 
 RU18_24_diff <-
@@ -1192,23 +1217,39 @@ ggplotly(g1, tooltip = 'text')
 # military -----------------------------------------------------------------
 
 
-RU_Pro_flag <- RU04_24 %>% 
-  distinct(UIK,year,Location,country,en_country) %>% 
+RU_Pro_flag <- RU04_24 %>%
+  distinct(UIK,year,Location,country,en_country) %>%
   mutate(Location = str_trim(Location)) %>%
   mutate(ru_pro = case_when(
     str_detect(Location,
-  'Миноб|ФСБ|батальон|ОКРМС|штаб|в/ч|Матросский|офицеров|ОШК|ДОФ|КСПМ|Батальон|Клуб 1472')~'Military',
+               'Миноб|ФСБ|батальон|ОКРМС|штаб|в/ч|Матросский|офицеров|ОШК|ДОФ|КСПМ|Батальон|Клуб 1472')~'Military',
     str_detect(country,'Молда|Абха|Осет')~ "Military",
     UIK == 8027  ~ "Military",
-    TRUE ~"Non military")) 
+    TRUE ~"Non military"))
 
-# tmp <- tibble(UIK=8236,Location='Гаага',ru_pro = "Нет",country = "Голландия",en_country = "Netherlands")
-# RU_Pro_flag_upd <-    rows_update(RU_Pro_flag,tmp,by = c('UIK','Location'))
-# df_RU <- 
+RU04_24_PM <-
   RU04_24 %>% 
-  mutate(Location = str_trim(Location)) %>% 
-  left_join(RU_Pro_flag,by=join_by(UIK,year,Location,en_country)) %>% select(-country.y) %>% 
-  write.csv('Data/RU04_24_Russia.csv',row.names = FALSE)
+  filter(str_detect(Label,'Пу|Ме|yes')) %>% 
+  group_by(UIK,Location,en_country,year,region) %>% 
+  summarise(rat = mean(ratio), people = sum(number)) #%>%
+
+df_mlt <- RU04_24_PM %>% 
+  mutate(Location = str_trim(Location)) %>%
+  left_join(RU_Pro_flag,by=join_by(UIK,year,Location,en_country)) %>%
+  mutate(year = as.factor(year)) %>%
+  arrange(year) %>%
+  mutate(rat_bin = cut(rat,seq(0,100,by=5),right = TRUE)) %>% 
+  group_by(year,rat_bin,ru_pro) %>% 
+  summarise(people_bin = sum(people)) 
+
+df_mlt %>% 
+  pivot_wider(id_cols = c(rat_bin,year),names_from = ru_pro,values_from = people_bin) %>% 
+  mutate(rat_bin = str_replace(rat_bin,'\\(',''),
+         rat_bin = str_replace(rat_bin,'\\]',''),
+         rat_bin = str_replace(rat_bin,'\\,','-')) %>% 
+  filter(year==2024) %>% 
+  write.csv('out/df_mlt24.csv',row.names = FALSE)
+
 # histogram ---------------------------------------------------------------
 RU04_24_PM <-
   RU04_24 %>% 
@@ -1288,6 +1329,10 @@ RU04_24 %>%
 
 # misc --------------------------------------------------------------------
 RU04_24 %>% 
-  filter(UIK == 8027) %>% 
+# RU04_24_PM %>% 
+  # filter(year==2008,rat<60) %>% 
+  filter(UIK==5131) %>% 
+  # filter(en_country == "Cyprus",year%in% c(2018,2024)) %>% 
+  # filter(UIK == 8027) %>% 
   # filter(en_country=="Armenia", year==2024, Location=="Ереван") %>% 
   View()
