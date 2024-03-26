@@ -525,8 +525,8 @@ sum_voters <- total_voters %>%
 
 
 sum_voters %>% 
-  filter(year==2012) %>% 
-  write.csv('out/df_2012_cntr_results.csv',row.names = FALSE)
+  filter(year==2008) %>% 
+  write.csv('out/df_2008_cntr_results.csv',row.names = FALSE)
 
 ыdf_12_18_people_diff <- sum_voters %>% 
 group_by(en_country) %>% 
