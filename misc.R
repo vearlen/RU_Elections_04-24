@@ -12,13 +12,6 @@ pu <- tibble(year=c(2004,2008,2012,2018,2020,2024),
 выборов в РФ",6)) %>% 
   mutate(rat_dec = rat*0.01)
 
-RU04_20 %>% 
-  filter(year == 2018,en_country == 'Latvia',
-         Label=='Число действительных избирательных бюллетеней') %>% 
-  # View()
-  summarise(sum = sum(number))
-
-
 
 # RU04_20 %>% 
 #   filter(year == 2018,
@@ -101,70 +94,6 @@ RU04_24 %>%
 
 write.csv(RU04_24,'Data/RU04_24_Russia.csv',row.names = FALSE)
 # countries proportions ---------------------------------------------------
-
-# RU_total <- RU04_20 %>% 
-#   # filter(region == "Europe") %>%
-#   filter(Label %in% c("Число недействительных избирательных бюллетеней",
-#                       "Число действительных избирательных бюллетеней","Ballots.in.box")) %>% 
-#   group_by(year) %>% 
-#   summarise(total = sum(number)) 
-# 
-# # cumulative add to total voters
-# RU_cumsum <- RU04_20 %>% 
-#   # filter(region == "Europe") %>% 
-#   filter(Label %in% c("Число недействительных избирательных бюллетеней",
-#                       "Число действительных избирательных бюллетеней","Ballots.in.box")) %>% 
-#   group_by(en_country,year) %>% 
-#   summarise(cntr_total = sum(number)) %>% 
-#   arrange(-cntr_total) %>% 
-#   left_join(RU_total) %>% 
-#   mutate(ratio = round((cntr_total/total)*100,4)) %>%
-#   group_by(year) %>% 
-#   mutate(cum_rat = cumsum(ratio),cum_num = cumsum(cntr_total),index = row_number()) 
-
-# cumulative graph
-# RU_cumsum %>% 
-#   ggplot(aes(x=index,y=cum_rat))+
-#   geom_point(aes(color=ifelse(en_country == "Austria",'red','grey70')))+
-#   facet_grid(~year)+
-#   scale_color_identity()+
-#   theme_minimal_hgrid()+
-#   panel_border()
-
-
-# g1 <- RU_cumsum %>% 
-#   filter(cum_rat <= 75) %>% 
-#   filter(year==2018) %>% 
-#   # arrange(year,-index) %>%
-#   mutate(en_country = if_else(grepl("America",en_country),"USA",en_country)) %>%
-#   # View()
-#   ggplot(aes(
-#     text = paste0(
-#       "страна: ", en_country,
-#       "<br>кол-во проголосовавших: ", cntr_total,
-#       "<br>от всех избирателей: ", round(ratio,0),"%",
-#       "<br>накопленный процент: ", round(cum_rat,0),"%"
-#     )))+
-#   geom_col(aes(y=ratio,x=reorder(en_country,-ratio)))+
-#   geom_line(aes(y=cum_rat,group=1,x=reorder(en_country,-ratio)))+
-#              # facet_grid(.~year)+
-#              theme_cowplot()+
-#              panel_border()+
-#              labs(y="",x="")+
-#   theme(axis.text.x = element_text(angle=90))
-#          
-# 
-# ggplotly(g1,tooltip = 'text')
-# 
-# 
-# RU_cumsum %>% 
-#   filter(cum_rat <= 75) %>% 
-#   group_by(year) %>% 
-#   summarize(n = max(index)) %>%
-#   ggplot(aes(x=year,y=n))+
-#   geom_col()
-# 
-# 
 
 
 
@@ -541,7 +470,7 @@ total_voters <- RU04_24 %>%
 
   filter(Label %in% c("Число недействительных избирательных бюллетеней",
                       "Число действительных избирательных бюллетеней","Ballots.in.box")) %>% 
-  group_by(year,en_country) %>% 
+  group_by(year,en_country, alpha.2) %>% 
   summarise(total = sum(number))
 
 gov_voters <- RU04_24 %>% 
@@ -549,13 +478,13 @@ gov_voters <- RU04_24 %>%
                       "Путин Владимир Владимирович",
                       "Медведев Дмитрий Анатольевич"
   )) %>%
-  group_by(year,en_country) %>% 
+  group_by(year,en_country,alpha.2) %>% 
   summarize(gov_total = sum(number))
 
 reject_voters <- RU04_24 %>% 
   filter(Label %in% c("Rejected.ballots",
                       "Число недействительных избирательных бюллетеней")) %>% 
-  group_by(year,en_country) %>% 
+  group_by(year,en_country,alpha.2) %>% 
   summarize(reject_total = sum(number))
 
 against_voters <- RU04_24 %>% 
@@ -579,7 +508,7 @@ against_voters <- RU04_24 %>%
                       "Слуцкий Леонид Эдуардович",
                       "Харитонов Николай Михайлович",
                       "no")) %>% 
-  group_by(year,en_country) %>% 
+  group_by(year,en_country,alpha.2) %>% 
   summarize(against_total = sum(number))
 
 
@@ -592,7 +521,14 @@ sum_voters <- total_voters %>%
          against_ratio = against_total/total)
 
 
-df_12_18_people_diff <- sum_voters %>% 
+# export map data ---------------------------------------------------------
+
+
+sum_voters %>% 
+  filter(year==2012) %>% 
+  write.csv('out/df_2012_cntr_results.csv',row.names = FALSE)
+
+ыdf_12_18_people_diff <- sum_voters %>% 
 group_by(en_country) %>% 
   arrange(en_country,year) %>% 
   filter(year!=2020) %>% 

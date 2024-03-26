@@ -11,7 +11,7 @@ website:
       - href: index.qmd
         text: Основной текст
       - href: about.qmd
-        text: Черновик
+        text: Карта
 
 format:
   html:
