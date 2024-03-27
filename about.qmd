@@ -1,13 +1,17 @@
 ---
-title: "Карта"
+title: "Map"
 execute:
   echo: false 
   warning: false
-subtitle: "Как голосуют на российских выборах граждане РФ проживающие за границей"
-author: "Илья Тищенко"
+subtitle: "How russians vote abroad for Russian president \"elections\""
+author: "Ilya Tishchenko"
 format:
   html:
-    page-layout: full
+    page-layout: full 
+    grid:
+      sidebar-width: 100px
+      body-width: 1000px
+      margin-width: 100px
 ---
 
 ```{=html}

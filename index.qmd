@@ -1,10 +1,10 @@
 ---
-title: "Выборы в России из-за границы"
+title: "Russian elections from abroad"
 execute:
   echo: false 
   warning: false
-subtitle: "Как голосуют на российских выборах граждане РФ проживающие за границей"
-author: "Илья Тищенко"
+subtitle: "How russians vote abroad for Russian president \"elections\""
+author: "Ilya Tishchenko"
 fig-responsive: false
 ---
 
@@ -22,6 +22,10 @@ fig-responsive: false
 
 # Количество людей пришедших на голосование
 
+```{=html}
+<iframe title="Russian elections, demographic of voters" aria-label="Stacked Bars" id="datawrapper-chart-i58j7" src="https://datawrapper.dwcdn.net/i58j7/3/" scrolling="no" frameborder="0" style="width: 0; min-width: 100% !important; border: none;" height="336" data-external="1"></iframe><script type="text/javascript">!function(){"use strict";window.addEventListener("message",(function(a){if(void 0!==a.data["datawrapper-height"]){var e=document.querySelectorAll("iframe");for(var t in a.data["datawrapper-height"])for(var r=0;r<e.length;r++)if(e[r].contentWindow===a.source){var i=a.data["datawrapper-height"][t]+"px";e[r].style.height=i}}}))}();
+</script>
+```
 ```{r}
 library(tidyverse)
 library(plotly)
@@ -30,14 +34,14 @@ library(ggstar)
 library(DT)
 library('ggrepel')
 library(modelsummary)
-# options(scipen = 999)
+options(scipen = 999)
 RU04_24 <- read.csv("Data/RU04_24_Russia.csv")
 
 # official results PU, ME, Referendum
 pu <- tibble(year=c(2004,2008,2012,2018,2020, 2024),
              rat=c(71.3,70.28,63.6,76.7,78.45, 87),
-             en_country = rep("Официальный результат 
-выборов в РФ",6)) %>% 
+             en_country = rep("Официальный результат
+выборов в РФ",6)) %>%
   mutate(rat_dec = rat*0.01)
 ```
 
@@ -47,116 +51,120 @@ pu <- tibble(year=c(2004,2008,2012,2018,2020, 2024),
 #| label: fig-total_voters
 #| fig-cap: "Turnout abroad for Russian elections"
 
-total_voters_fn <- function(sel_region = NA, sel_country = NA){
-  if(is.na(sel_region)){
-    sel_region = all_of(RU04_24$region)
-    sel_region_label = NULL
-  }  else {
-    sel_region
-    sel_region_label = sel_region
-  }
-
-  if(is.na(sel_country)){
-    sel_country = all_of(RU04_24$en_country)
-    sel_country_label = NULL
-  } else {
-    sel_country
-    sel_country_label = sel_country
-  }
+# total_voters_fn <- function(sel_region = NA, sel_country = NA){
+#   if(is.na(sel_region)){
+#     sel_region = all_of(RU04_24$region)
+#     sel_region_label = NULL
+#   }  else {
+#     sel_region
+#     sel_region_label = sel_region
+#   }
+# 
+#   if(is.na(sel_country)){
+#     sel_country = all_of(RU04_24$en_country)
+#     sel_country_label = NULL
+#   } else {
+#     sel_country
+#     sel_country_label = sel_country
+#   }
+# #   
+#   total_voters <- RU04_24 %>% 
+#     filter(region %in% c(sel_region)) %>%
+#     filter(en_country %in% c(sel_country)) %>%
+#     filter(Label %in% c("Число недействительных избирательных бюллетеней",
+#                         "Число действительных избирательных бюллетеней","Ballots.in.box")) %>% 
+#     group_by(year) %>% 
+#     summarise(total = sum(number))
 #   
-  total_voters <- RU04_24 %>% 
-    filter(region %in% c(sel_region)) %>%
-    filter(en_country %in% c(sel_country)) %>%
-    filter(Label %in% c("Число недействительных избирательных бюллетеней",
-                        "Число действительных избирательных бюллетеней","Ballots.in.box")) %>% 
-    group_by(year) %>% 
-    summarise(total = sum(number))
-  
-  g1 <- total_voters %>% 
-    ggplot(aes(x=year,y=total))+
-    geom_bar(position = 'stack',stat='identity', fill='#0084D7')+
-    geom_text(aes(label=total,y=total*0.84),vjust = 1.5,color='grey99',size=3)+
-    coord_flip()+
-    theme_cowplot()+
-    theme_minimal_vgrid(font_size = 9)+
-    labs(y="",x="",fill="",title=paste0("Turnout abroad Russia ",sel_region_label,"  ",sel_country_label),
-         subtitle= "")+
-    scale_x_continuous(breaks = c(2024,2020,2018,2012,2008, 2004),
-                       expand = expansion(0.1,0))+
-    scale_y_continuous(labels = scales::comma,expand = expansion(0.01,0.2))+
-    theme(legend.position = 'top',
-          axis.line = element_blank(),
-          axis.ticks.x = element_blank(),
-          plot.subtitle = element_text(size=10,color='grey90',hjust=1),
-          axis.ticks = element_blank())
-  # g1
-  ggplotly(g1)
-}
-total_voters_fn()
+#   g1 <- total_voters %>% 
+#     ggplot(aes(x=year,y=total))+
+#     geom_bar(position = 'stack',stat='identity', fill='#0084D7')+
+#     geom_text(aes(label=total,y=total*0.84),vjust = 1.5,color='grey99',size=3)+
+#     coord_flip()+
+#     theme_cowplot()+
+#     theme_minimal_vgrid(font_size = 9)+
+#     labs(y="",x="",fill="",title=paste0("Turnout abroad Russia ",sel_region_label,"  ",sel_country_label),
+#          subtitle= "")+
+#     scale_x_continuous(breaks = c(2024,2020,2018,2012,2008, 2004),
+#                        expand = expansion(0.1,0))+
+#     scale_y_continuous(labels = scales::comma,expand = expansion(0.01,0.2))+
+#     theme(legend.position = 'top',
+#           axis.line = element_blank(),
+#           axis.ticks.x = element_blank(),
+#           plot.subtitle = element_text(size=10,color='grey90',hjust=1),
+#           axis.ticks = element_blank())
+#   # g1
+#   ggplotly(g1)
+# }
+# total_voters_fn()
 ```
 
 Тем не менее, как и многие я видел огромные очереди в избирательные участки в Вене, [Берлине](https://youtu.be/JmQw0TTWopU?si=JmhoYO32GIe0qt16), [Париже](https://www.youtube.com/live/FfY5mVx6Ir8?si=2w4nwVIF3_f40x3a&t=1688), Лондоне и [прочих](https://youtu.be/PdUrk4EEZUk?si=zWqv3t0ERDLsFteK) [городах](https://youtu.be/MMVJ-81B_h0?si=2CYBKrxQgn0TA_Xp). Как изменилась явка на зарубежных участках? На @fig-turnout по оси Х показано изменение явки в 2024 по сравнению с 2018, положительные значения - людей пришло больше 2024, размер точки - общее кол-во людей пришедших на участок.
 
+```{=html}
+<iframe title="Elections of Russian president, 2024" aria-label="Bar Chart" id="datawrapper-chart-vr6gs" src="https://datawrapper.dwcdn.net/vr6gs/4/" scrolling="no" frameborder="0" style="width: 0; min-width: 100% !important; border: none;" height="790" data-external="1"></iframe><script type="text/javascript">!function(){"use strict";window.addEventListener("message",(function(a){if(void 0!==a.data["datawrapper-height"]){var e=document.querySelectorAll("iframe");for(var t in a.data["datawrapper-height"])for(var r=0;r<e.length;r++)if(e[r].contentWindow===a.source){var i=a.data["datawrapper-height"][t]+"px";e[r].style.height=i}}}))}();
+</script>
+```
 ```{r turnout_calc}
-RU_total_UIK <- RU04_24 %>% 
-  filter(Label %in% c("Число недействительных избирательных бюллетеней",
-                      "Число действительных избирательных бюллетеней","Ballots.in.box")) %>% 
-  group_by(UIK,year,en_country,Location) %>% 
-  summarise(total = sum(number)) 
-
-total_voters <- RU04_24 %>% 
-  filter(Label %in% c("Число недействительных избирательных бюллетеней",
-                      "Число действительных избирательных бюллетеней","Ballots.in.box")) %>% 
-  group_by(UIK,year) %>% 
-  summarise(total = sum(number))
-
-gov_voters <- RU04_24 %>% 
-  filter(Label %in% c("yes",
-                      "Путин Владимир Владимирович",
-                      "Медведев Дмитрий Анатольевич"
-  )) %>%
-  group_by(UIK,year) %>% 
-  summarize(gov_total = sum(number))
-
-reject_voters <- RU04_24 %>% 
-  filter(Label %in% c("Rejected.ballots",
-                      "Число недействительных избирательных бюллетеней")) %>% 
-  group_by(UIK,year) %>% 
-  summarize(reject_total = sum(number))
-
-against_voters <- RU04_24 %>% 
-  filter(Label %in% c("Глазьев Сергей Юрьевич",
-                      "Против всех",
-                      "Малышкин Олег Александрович",
-                      "Миронов Сергей Михайлович",
-                      "Хакамада Ирина Муцуовна",
-                      "Харитонов Николай Михайлович",
-                      "Богданов Андрей Владимирович",
-                      "Жириновский Владимир Вольфович",
-                      "Зюганов Геннадий Андреевич",
-                      "Прохоров Михаил Дмитриевич",
-                      "Бабурин Сергей Николаевич",
-                      "Грудинин Павел Николаевич",
-                      "Собчак Ксения Анатольевна",
-                      "Сурайкин Максим Александрович",
-                      "Титов Борис Юрьевич",
-                      "Явлинский Григорий Алексеевич",
-                      "Даванков Владислав Андреевич",
-                      "Слуцкий Леонид Эдуардович",
-                      "Харитонов Николай Михайлович",
-                      "no")) %>% 
-  group_by(UIK,year) %>% 
-  summarize(against_total = sum(number))
-
-
-sum_voters <- total_voters %>% 
-  left_join(gov_voters) %>% 
-  left_join(reject_voters) %>% 
-  left_join(against_voters) %>% 
-  mutate(gov_ratio = gov_total/total,
-         reject_ratio = reject_total/total,
-         against_ratio = against_total/total) %>% 
-  mutate(gov_flag = if_else(gov_ratio > 0.5, "Y","N"))
+# RU_total_UIK <- RU04_24 %>% 
+#   filter(Label %in% c("Число недействительных избирательных бюллетеней",
+#                       "Число действительных избирательных бюллетеней","Ballots.in.box")) %>% 
+#   group_by(UIK,year,en_country,Location) %>% 
+#   summarise(total = sum(number)) 
+# 
+# total_voters <- RU04_24 %>% 
+#   filter(Label %in% c("Число недействительных избирательных бюллетеней",
+#                       "Число действительных избирательных бюллетеней","Ballots.in.box")) %>% 
+#   group_by(UIK,year) %>% 
+#   summarise(total = sum(number))
+# 
+# gov_voters <- RU04_24 %>% 
+#   filter(Label %in% c("yes",
+#                       "Путин Владимир Владимирович",
+#                       "Медведев Дмитрий Анатольевич"
+#   )) %>%
+#   group_by(UIK,year) %>% 
+#   summarize(gov_total = sum(number))
+# 
+# reject_voters <- RU04_24 %>% 
+#   filter(Label %in% c("Rejected.ballots",
+#                       "Число недействительных избирательных бюллетеней")) %>% 
+#   group_by(UIK,year) %>% 
+#   summarize(reject_total = sum(number))
+# 
+# against_voters <- RU04_24 %>% 
+#   filter(Label %in% c("Глазьев Сергей Юрьевич",
+#                       "Против всех",
+#                       "Малышкин Олег Александрович",
+#                       "Миронов Сергей Михайлович",
+#                       "Хакамада Ирина Муцуовна",
+#                       "Харитонов Николай Михайлович",
+#                       "Богданов Андрей Владимирович",
+#                       "Жириновский Владимир Вольфович",
+#                       "Зюганов Геннадий Андреевич",
+#                       "Прохоров Михаил Дмитриевич",
+#                       "Бабурин Сергей Николаевич",
+#                       "Грудинин Павел Николаевич",
+#                       "Собчак Ксения Анатольевна",
+#                       "Сурайкин Максим Александрович",
+#                       "Титов Борис Юрьевич",
+#                       "Явлинский Григорий Алексеевич",
+#                       "Даванков Владислав Андреевич",
+#                       "Слуцкий Леонид Эдуардович",
+#                       "Харитонов Николай Михайлович",
+#                       "no")) %>% 
+#   group_by(UIK,year) %>% 
+#   summarize(against_total = sum(number))
+# 
+# 
+# sum_voters <- total_voters %>% 
+#   left_join(gov_voters) %>% 
+#   left_join(reject_voters) %>% 
+#   left_join(against_voters) %>% 
+#   mutate(gov_ratio = gov_total/total,
+#          reject_ratio = reject_total/total,
+#          against_ratio = against_total/total) %>% 
+#   mutate(gov_flag = if_else(gov_ratio > 0.5, "Y","N"))
 
 ```
 
@@ -171,147 +179,151 @@ sum_voters <- total_voters %>%
 #     distinct(UIK,en_country,Location)
 
 
-
-df_turnout_18_24 <- 
-RU_total_UIK %>% 
-  filter(year %in% c(2018, 2024)) %>% 
-  mutate(Location = str_trim(Location)) %>%
-  # rows_patch(UIK_country_Loc_24,by=c("UIK",'en_country')) %>% 
-  pivot_wider(id_cols = c(UIK,en_country,Location),
-              names_from = year,values_from = total) %>% 
-  mutate(diff = `2024`- `2018`, ratio = round(diff/`2018`*100,0)) %>% 
-  filter(!is.na(`2024`)) %>%
-  left_join(filter(sum_voters,year==2024)) %>% 
-  mutate(Location = if_else(is.na(Location),paste0(en_country,'-',as.character(UIK)),Location)) %>% 
-  arrange(Location) %>% 
-  ungroup() %>% 
-  mutate(Location_Y = if_else(Location == lag(Location),paste0(Location,'-',as.character(UIK)),Location)) %>% 
-  mutate(Location_Y = if_else(is.na(Location_Y),Location,Location_Y))
-  
-
-pal <- c('brown','#0084D7')
-pal <- setNames(pal,c('Y','N'))
-p <-
-  plot_ly(
-    df_turnout_18_24 %>% 
-      filter(!is.na(ratio)),
-    y = ~ reorder(Location_Y, -ratio),
-    x = ~ ratio,
-    size = ~ `2024`,
-    alpha = 0.6,
-    color = ~ gov_flag,
-    colors=pal,
-    text = ~paste("Country: ",en_country,
-                  '<br>Location: ', Location_Y,'/',UIK,
-                  '<br>Turnout',
-                  '<br>  \'18:',`2018`,
-                  '<br>  \'24:',`2024` ,
-                  '<br>Difference: ', ratio,
-                  '%<br>for Putin: ',round(gov_ratio*100,0),'%'),
-    hoverinfo = 'text'
-  ) %>% 
-  add_markers(sizes = c(30,1000))
-
-p %>% layout(yaxis=list(title=""),xaxis=list(title="Difference in turnout 2018-2024, %"),legend = list(orientation = 'h',title = list(text = "Putin won?"),y = 1,x=0.2))
+# 
+# df_turnout_18_24 <- 
+# RU_total_UIK %>% 
+#   filter(year %in% c(2018, 2024)) %>% 
+#   mutate(Location = str_trim(Location)) %>%
+#   # rows_patch(UIK_country_Loc_24,by=c("UIK",'en_country')) %>% 
+#   pivot_wider(id_cols = c(UIK,en_country,Location),
+#               names_from = year,values_from = total) %>% 
+#   mutate(diff = `2024`- `2018`, ratio = round(diff/`2018`*100,0)) %>% 
+#   filter(!is.na(`2024`)) %>%
+#   left_join(filter(sum_voters,year==2024)) %>% 
+#   mutate(Location = if_else(is.na(Location),paste0(en_country,'-',as.character(UIK)),Location)) %>% 
+#   arrange(Location) %>% 
+#   ungroup() %>% 
+#   mutate(Location_Y = if_else(Location == lag(Location),paste0(Location,'-',as.character(UIK)),Location)) %>% 
+#   mutate(Location_Y = if_else(is.na(Location_Y),Location,Location_Y))
+#   
+# 
+# pal <- c('brown','#0084D7')
+# pal <- setNames(pal,c('Y','N'))
+# p <-
+#   plot_ly(
+#     df_turnout_18_24 %>% 
+#       filter(!is.na(ratio)),
+#     y = ~ reorder(Location_Y, -ratio),
+#     x = ~ ratio,
+#     size = ~ `2024`,
+#     alpha = 0.6,
+#     color = ~ gov_flag,
+#     colors=pal,
+#     text = ~paste("Country: ",en_country,
+#                   '<br>Location: ', Location_Y,'/',UIK,
+#                   '<br>Turnout',
+#                   '<br>  \'18:',`2018`,
+#                   '<br>  \'24:',`2024` ,
+#                   '<br>Difference: ', ratio,
+#                   '%<br>for Putin: ',round(gov_ratio*100,0),'%'),
+#     hoverinfo = 'text'
+#   ) %>% 
+#   add_markers(sizes = c(30,1000))
+# 
+# p %>% layout(yaxis=list(title=""),xaxis=list(title="Difference in turnout 2018-2024, %"),legend = list(orientation = 'h',title = list(text = "Putin won?"),y = 1,x=0.2))
 ```
 
 ```{r sum_ratio_calc}
-total_sum <- total_voters %>% group_by(year) %>% summarize(sum = sum(total))
-total_gov <- gov_voters %>% group_by(year) %>% summarise(sum_gov = sum(gov_total))
-
-df_fake <- df_turnout_18_24 %>%
-  filter(ratio > 506) %>%
-  distinct(UIK) %>%
-  left_join(gov_voters) %>%
-  left_join(sum_voters) %>%
-  filter(year==2024) %>% 
-  left_join(total_sum) %>% 
-  left_join(total_gov) %>% 
-  mutate(ratio_total = total/sum,ratio_gov = gov_total/sum_gov) %>% 
-  select(UIK,ratio_total,ratio_gov) %>% 
-  summarise(sum_ratio = sum(ratio_total),sum_ratio_gov = sum(ratio_gov))
+# total_sum <- total_voters %>% group_by(year) %>% summarize(sum = sum(total))
+# total_gov <- gov_voters %>% group_by(year) %>% summarise(sum_gov = sum(gov_total))
+# 
+# df_fake <- df_turnout_18_24 %>%
+#   filter(ratio > 506) %>%
+#   distinct(UIK) %>%
+#   left_join(gov_voters) %>%
+#   left_join(sum_voters) %>%
+#   filter(year==2024) %>% 
+#   left_join(total_sum) %>% 
+#   left_join(total_gov) %>% 
+#   mutate(ratio_total = total/sum,ratio_gov = gov_total/sum_gov) %>% 
+#   select(UIK,ratio_total,ratio_gov) %>% 
+#   summarise(sum_ratio = sum(ratio_total),sum_ratio_gov = sum(ratio_gov))
 ```
 
-В глаза бросаются пять участков справа: Анкара, Молдова, Бангладеш, Кипр и Египет. В них положительная разница в явке более 500%. Суммарно эти участки дают `r round(df_fake$sum_ratio*100,0)` % всех голосов.
+В глаза бросаются пять участков справа: Анкара, Молдова, Бангладеш, Кипр и Египет. В них положительная разница в явке более 500%. Суммарно эти участки дают % всех голосов.
 
 Пропускная способность в Зальцбурге была `r round(1437/13/3,0)` человека на одного человека в комисии в час, в Вене `r round(2278/13/6,0)`. Если предположить что скорость в Зальцбурге нормальная, то по количеству проголосовавших людей можно предположить где могли произойти вбросы. На @fig-cum_ratio показаны участки составляющие 60% всех голосующих.
 
+```{=html}
+<iframe title="Countries input in total votes abroad" aria-label="Interactive line chart" id="datawrapper-chart-OywM8" src="https://datawrapper.dwcdn.net/OywM8/4/" scrolling="no" frameborder="0" style="width: 0; min-width: 100% !important; border: none;" height="490" data-external="1"></iframe><script type="text/javascript">!function(){"use strict";window.addEventListener("message",(function(a){if(void 0!==a.data["datawrapper-height"]){var e=document.querySelectorAll("iframe");for(var t in a.data["datawrapper-height"])for(var r=0;r<e.length;r++)if(e[r].contentWindow===a.source){var i=a.data["datawrapper-height"][t]+"px";e[r].style.height=i}}}))}();
+</script>
+```
 ```{r cum_ratio}
 #| label: fig-cum_ratio
 #| fig-cap: "Locations with 60% contribution to total voters"
 #| fig-height: 6
 #| 
-df_cum_18_24 <- df_turnout_18_24 %>% 
-  arrange(-total) %>% 
-  mutate(cum_total = cumsum(total)) %>% 
-  mutate(cum_ratio = cum_total/380724,ratio = total/380724) 
-
-
-cum_75plot <-  function(el_year=2024,limit_ratio = 0.75){
-  g1 <- df_cum_18_24 %>%
-    filter(cum_ratio <= limit_ratio) %>%
-    filter(year == el_year) %>%
-    ggplot(aes(
-      text = paste0(
-        "Country: ",
-        en_country,
-        "<br>People voted: ",
-        total,
-        "<br>From all: ",
-        round(ratio*100, 1),
-        "%",
-        "<br>Cumulative: ",
-        round(cum_ratio * 100, 1),
-        "%",
-        "<br>Putin result: ",
-        round(gov_ratio * 100, 0),
-        "%"
-      )
-    )) +
-    geom_col(aes(
-      y = ratio,
-      x = reorder(Location_Y, -ratio),
-      fill = gov_flag
-    )) +
-    geom_line(
-      aes(
-        y = cum_ratio,
-        group = 1,
-        x = reorder(Location_Y, -ratio)
-      ),
-      color = 'grey20',
-      linewidth = 0.1
-    ) +
-    geom_point(
-      aes(y = cum_ratio, x = reorder(Location_Y, -ratio)),
-      color = 'grey20',
-      size = 1.5,
-      alpha = 0.6
-    ) +
-    theme_minimal_hgrid() +
-    labs(y = "Percent from all voters", 
-         x = "", 
-         title = "Locations with total amount of 60% from all voters",
-         fill = "Putin won?") +
-    scale_y_continuous(labels = scales::percent_format(accuracy = 1),
-                       expand = expansion(0.01, 0)) +
-    theme(
-      axis.text.x = element_text(
-        angle = 90,
-        size = 9,
-        color = 'grey40'
-      ),
-      axis.line = element_blank(),
-      axis.ticks = element_blank(),
-      axis.text.y = element_text(size = 9, color = 'grey40'),
-      title = element_text(size = 12, color = 'grey20'),
-      axis.title = element_text(size = 10, color = 'grey30')
-    )
-         
-
-ggplotly(g1,tooltip = 'text')
-}
-cum_75plot(limit_ratio = 0.6)
+# df_cum_18_24 <- df_turnout_18_24 %>% 
+#   arrange(-total) %>% 
+#   mutate(cum_total = cumsum(total)) %>% 
+#   mutate(cum_ratio = cum_total/380724,ratio = total/380724) 
+# 
+# 
+# cum_75plot <-  function(el_year=2024,limit_ratio = 0.75){
+#   g1 <- df_cum_18_24 %>%
+#     filter(cum_ratio <= limit_ratio) %>%
+#     filter(year == el_year) %>%
+#     ggplot(aes(
+#       text = paste0(
+#         "Country: ",
+#         en_country,
+#         "<br>People voted: ",
+#         total,
+#         "<br>From all: ",
+#         round(ratio*100, 1),
+#         "%",
+#         "<br>Cumulative: ",
+#         round(cum_ratio * 100, 1),
+#         "%",
+#         "<br>Putin result: ",
+#         round(gov_ratio * 100, 0),
+#         "%"
+#       )
+#     )) +
+#     geom_col(aes(
+#       y = ratio,
+#       x = reorder(Location_Y, -ratio),
+#       fill = gov_flag
+#     )) +
+#     geom_line(
+#       aes(
+#         y = cum_ratio,
+#         group = 1,
+#         x = reorder(Location_Y, -ratio)
+#       ),
+#       color = 'grey20',
+#       linewidth = 0.1
+#     ) +
+#     geom_point(
+#       aes(y = cum_ratio, x = reorder(Location_Y, -ratio)),
+#       color = 'grey20',
+#       size = 1.5,
+#       alpha = 0.6
+#     ) +
+#     theme_minimal_hgrid() +
+#     labs(y = "Percent from all voters", 
+#          x = "", 
+#          title = "Locations with total amount of 60% from all voters",
+#          fill = "Putin won?") +
+#     scale_y_continuous(labels = scales::percent_format(accuracy = 1),
+#                        expand = expansion(0.01, 0)) +
+#     theme(
+#       axis.text.x = element_text(
+#         angle = 90,
+#         size = 9,
+#         color = 'grey40'
+#       ),
+#       axis.line = element_blank(),
+#       axis.ticks = element_blank(),
+#       axis.text.y = element_text(size = 9, color = 'grey40'),
+#       title = element_text(size = 12, color = 'grey20'),
+#       axis.title = element_text(size = 10, color = 'grey30')
+#     )
+#          
+# 
+# ggplotly(g1,tooltip = 'text')
+# }
+# cum_75plot(limit_ratio = 0.6)
 
 ```
 
@@ -321,38 +333,32 @@ cum_75plot(limit_ratio = 0.6)
 
 ```{r military_calc}
 
-RU_Pro_flag <- RU04_24 %>%
-  distinct(UIK,year,Location,country,en_country) %>%
-  mutate(Location = str_trim(Location)) %>%
-  mutate(ru_pro = case_when(
-    str_detect(Location,
-  'Миноб|ФСБ|батальон|ОКРМС|штаб|в/ч|Матросский|офицеров|ОШК|ДОФ|КСПМ|Батальон|Клуб 1472')~'Military',
-    str_detect(country,'Молда|Абха|Осет')~ "Military",
-    UIK == 8027  ~ "Military",
-    TRUE ~"Non military"))
-
-RU04_24_PM <-
-  RU04_24 %>% 
-  filter(str_detect(Label,'Пу|Ме|yes')) %>% 
-  group_by(UIK,Location,en_country,year,region) %>% 
-  summarise(rat = mean(ratio), people = sum(number)) #%>%
-
-df_mlt <- RU04_24_PM %>% 
-  mutate(Location = str_trim(Location)) %>%
-  left_join(RU_Pro_flag,by=join_by(UIK,year,Location,en_country)) %>%
-  mutate(year = as.factor(year)) %>%
-  arrange(year) %>%
-  mutate(rat_bin = cut(rat,seq(0,100,by=5),right = TRUE)) %>% 
-  group_by(year,rat_bin,ru_pro) %>% 
-  summarise(people_bin = sum(people)) 
+# RU_Pro_flag <- RU04_24 %>%
+#   distinct(UIK,year,Location,country,en_country) %>%
+#   mutate(Location = str_trim(Location)) %>%
+#   mutate(ru_pro = case_when(
+#     str_detect(Location,
+#   'Миноб|ФСБ|батальон|ОКРМС|штаб|в/ч|Матросский|офицеров|ОШК|ДОФ|КСПМ|Батальон|Клуб 1472')~'Military',
+#     str_detect(country,'Молда|Абха|Осет')~ "Military",
+#     UIK == 8027  ~ "Military",
+#     TRUE ~"Non military"))
+# 
+# RU04_24_PM <-
+#   RU04_24 %>% 
+#   filter(str_detect(Label,'Пу|Ме|yes')) %>% 
+#   group_by(UIK,Location,en_country,year,region) %>% 
+#   summarise(rat = mean(ratio), people = sum(number)) #%>%
+# 
+# df_mlt <- RU04_24_PM %>% 
+#   mutate(Location = str_trim(Location)) %>%
+#   left_join(RU_Pro_flag,by=join_by(UIK,year,Location,en_country)) %>%
+#   mutate(year = as.factor(year)) %>%
+#   arrange(year) %>%
+#   mutate(rat_bin = cut(rat,seq(0,100,by=5),right = TRUE)) %>% 
+#   group_by(year,rat_bin,ru_pro) %>% 
+#   summarise(people_bin = sum(people)) 
   
 ```
-
-```{=html}
-<iframe title="Russian elections, 2004" aria-label="Stacked Bars" id="datawrapper-chart-EUK0C" src="https://datawrapper.dwcdn.net/EUK0C/1/" scrolling="no" frameborder="0" style="width: 0; min-width: 100% !important; border: none;" height="421" data-external="1"></iframe><script type="text/javascript">!function(){"use strict";window.addEventListener("message",(function(a){if(void 0!==a.data["datawrapper-height"]){var e=document.querySelectorAll("iframe");for(var t in a.data["datawrapper-height"])for(var r=0;r<e.length;r++)if(e[r].contentWindow===a.source){var i=a.data["datawrapper-height"][t]+"px";e[r].style.height=i}}}))}();
-</script>
-```
-В 2018 есть подозрение, что какие-то военные части я не учел. В 2024 году интервал начиная с 85 и выше либо вбросы (Кипр) либо военные, что отражает последние выборы даже за рубежом.
 
 ```{r military_fig}
 #| label: fig-military_fig
@@ -436,24 +442,24 @@ df_mlt <- RU04_24_PM %>%
 ```{r mil_prop}
 #| label: fig-mil_prop
 #| fig-cap: "Military controlled voters, %"
-g1 <- RU04_24_PM %>%
-  mutate(Location = str_trim(Location)) %>%
-  left_join(RU_Pro_flag,by=join_by(UIK,year,Location,en_country)) %>%
-  group_by(year,ru_pro) %>%
-  summarise(people = sum(people)) %>%
-  pivot_wider(id_cols = year,names_from = ru_pro,values_from = people) %>%
-  mutate(Y_N_ratio = `Military`/(`Military`+`Non military`)) %>% 
-  ggplot()+
-  geom_col(aes(x=year,y=Y_N_ratio),fill='brown')+
-  geom_text(aes(x=year,label=paste0(round(Y_N_ratio*100,0),"%"),y=Y_N_ratio*0.92),vjust = 1.5,color='grey99')+
-  theme_minimal_hgrid(font_size = 10)+
-  scale_y_continuous(labels = scales::percent_format(accuracy = 1))+
-  labs(title="Military or controlled territories among voters abroad",x="",y="")+
-  scale_x_continuous(breaks = c(2004,2008,2012,2018,2020,2024))+
-  theme(axis.line = element_blank(),
-        axis.ticks = element_blank())
-
-g1
+# g1 <- RU04_24_PM %>%
+#   mutate(Location = str_trim(Location)) %>%
+#   left_join(RU_Pro_flag,by=join_by(UIK,year,Location,en_country)) %>%
+#   group_by(year,ru_pro) %>%
+#   summarise(people = sum(people)) %>%
+#   pivot_wider(id_cols = year,names_from = ru_pro,values_from = people) %>%
+#   mutate(Y_N_ratio = `Military`/(`Military`+`Non military`)) %>% 
+#   ggplot()+
+#   geom_col(aes(x=year,y=Y_N_ratio),fill='brown')+
+#   geom_text(aes(x=year,label=paste0(round(Y_N_ratio*100,0),"%"),y=Y_N_ratio*0.92),vjust = 1.5,color='grey99')+
+#   theme_minimal_hgrid(font_size = 10)+
+#   scale_y_continuous(labels = scales::percent_format(accuracy = 1))+
+#   labs(title="Military or controlled territories among voters abroad",x="",y="")+
+#   scale_x_continuous(breaks = c(2004,2008,2012,2018,2020,2024))+
+#   theme(axis.line = element_blank(),
+#         axis.ticks = element_blank())
+# 
+# g1
 ```
 
 # Динамика голосования
@@ -940,13 +946,9 @@ voters_total(sel_region = 'Europe',ratio=FALSE)
 
 На выборах 2024 людей поддерживающих Путина пришло меньше чем в 2018, а людей против, здесь учтены все другие кандидаты и порча бюллетеней больше. Забавно, что на Кипре, в Никосии, судя по количеству они подрисовали и протестные голоса, т.к. их количество выросло на 7149 человек.
 
-```{=html}
-<iframe title="Russian president elections 2024" aria-label="Dot Plot" id="datawrapper-chart-c5FGA" src="https://datawrapper.dwcdn.net/c5FGA/2/" scrolling="no" frameborder="0" style="width: 0; min-width: 100% !important; border: none;" height="767" data-external="1"></iframe><script type="text/javascript">!function(){"use strict";window.addEventListener("message",(function(a){if(void 0!==a.data["datawrapper-height"]){var e=document.querySelectorAll("iframe");for(var t in a.data["datawrapper-height"])for(var r=0;r<e.length;r++)if(e[r].contentWindow===a.source){var i=a.data["datawrapper-height"][t]+"px";e[r].style.height=i}}}))}();
-</script>
-```
 Тот факт, что в 2018 не было участков где Путин получил меньше 50% объясняется тем, что на выборы 18-го пришло больше избирателей за Путина и меньше против, по сравнению с 2012 годом.
 
 ```{=html}
-<iframe title="Russian president elections 2018" aria-label="Dot Plot" id="datawrapper-chart-azTHQ" src="https://datawrapper.dwcdn.net/azTHQ/1/" scrolling="no" frameborder="0" style="width: 0; min-width: 100% !important; border: none;" height="561" data-external="1"></iframe><script type="text/javascript">!function(){"use strict";window.addEventListener("message",(function(a){if(void 0!==a.data["datawrapper-height"]){var e=document.querySelectorAll("iframe");for(var t in a.data["datawrapper-height"])for(var r=0;r<e.length;r++)if(e[r].contentWindow===a.source){var i=a.data["datawrapper-height"][t]+"px";e[r].style.height=i}}}))}();
+<iframe title="Results of Russian president elections, 2024" aria-label="Map" id="datawrapper-chart-wyiK1" src="https://datawrapper.dwcdn.net/wyiK1/18/" scrolling="no" frameborder="0" style="width: 0; min-width: 100% !important; border: none;" height="564" data-external="1"></iframe><script type="text/javascript">!function(){"use strict";window.addEventListener("message",(function(a){if(void 0!==a.data["datawrapper-height"]){var e=document.querySelectorAll("iframe");for(var t in a.data["datawrapper-height"])for(var r=0;r<e.length;r++)if(e[r].contentWindow===a.source){var i=a.data["datawrapper-height"][t]+"px";e[r].style.height=i}}}))}();
 </script>
 ```

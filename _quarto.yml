@@ -9,9 +9,9 @@ website:
   navbar:
     left:
       - href: index.qmd
-        text: Основной текст
+        text: Article
       - href: about.qmd
-        text: Карта
+        text: Map
 
 format:
   html:
