@@ -78,15 +78,32 @@ df_mlt_total_cntr <- RU04_24 %>%
   filter(ru_pro=='Military') %>% select(-ru_pro)
 
 # add mlt total to sum of voters
-sum_voters_cntr_2 <- left_join(sum_voters_cntr,df_mlt_total_cntr) %>% 
+sum_voters_cntr_tmp <- left_join(sum_voters_cntr,df_mlt_total_cntr) %>% 
   mutate(mil_ratio = mil_total/total)
 
 
 
 # merge Abkhazia and Osetia -----------------------------------------------
+df_AbOs <- sum_voters_cntr_tmp %>% 
+  filter(en_country %in% c("Osetia","Abkhazia")) %>% 
+  select(year,total,gov_total,reject_total,against_total) %>% 
+  group_by(year) %>% 
+  summarise(total = sum(total),
+            gov_total = sum(gov_total),
+            reject_total = sum(reject_total),
+            against_total = sum(against_total)) %>% 
+  mutate(en_country = "Abkhazia & Osetia",
+         alpha.2 = "GE",
+         gov_ratio = gov_total/total,
+         reject_ratio = reject_total/total,
+         against_ratio = against_total/total,
+         ag_rej_ratio = (against_total + reject_total)/total,
+         mil_total = total,
+         mil_ratio =1) 
 
-
-
+sum_voters_cntr_2 <- sum_voters_cntr_tmp %>% 
+  filter(!en_country %in% c("Osetia","Abkhazia")) %>% 
+  bind_rows(df_AbOs)
 # calc diff to previous year
 # - take 2024
 # - take 2018
