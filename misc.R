@@ -698,9 +698,9 @@ summary(fit)
 
 g1 <- RU04_24_PM %>%
   ggplot(aes(x=people,y=rat,color=region))+
-  geom_point(alpha = 0.7, size=6)+
+  geom_point(alpha = 0.7, size=3)+
   scale_x_log10()+
-  theme_minimal(base_size = 20)+
+  theme_minimal(base_size = 16)+
   labs(title = "Year: {frame_time}",
     y = "votes for Putin, %",
     x = "Amount of people, log scale",
@@ -716,8 +716,8 @@ animate(g1,
   end_pause = 20,
   start_pause = 1,
   nframes = 100,
-  height = 600,
-  width = 600,
+  height = 400,
+  width = 400,
   units = "px")
 
 
