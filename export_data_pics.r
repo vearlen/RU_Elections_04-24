@@ -94,6 +94,7 @@ df_AbOs <- sum_voters_cntr_tmp %>%
             against_total = sum(against_total)) %>% 
   mutate(en_country = "Abkhazia & Osetia",
          alpha.2 = "GE",
+         ag_rej_total = (against_total + reject_total),
          gov_ratio = gov_total/total,
          reject_ratio = reject_total/total,
          against_ratio = against_total/total,
