@@ -81,6 +81,12 @@ df_mlt_total_cntr <- RU04_24 %>%
 sum_voters_cntr_2 <- left_join(sum_voters_cntr,df_mlt_total_cntr) %>% 
   mutate(mil_ratio = mil_total/total)
 
+
+
+# merge Abkhazia and Osetia -----------------------------------------------
+
+
+
 # calc diff to previous year
 # - take 2024
 # - take 2018
