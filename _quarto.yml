@@ -3,21 +3,14 @@ project:
   output-dir: docs
 
   
-
 website:
   title: "Russian elections'04-24"
-  navbar:
-    left:
-      - href: index.qmd
-        text: Article
-      - href: about.qmd
-        text: Map
-
+  
 format:
   html:
     theme: flatly
     css: styles.css
-    toc: true
+    toc: false
     fontsize: 1em
   
 editor: visual

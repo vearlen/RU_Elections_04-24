@@ -25,7 +25,6 @@ ul.task-list li input[type="checkbox"] {
 
 
 <script src="site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="site_libs/quarto-nav/headroom.min.js"></script>
 <script src="site_libs/clipboard/clipboard.min.js"></script>
 <script src="site_libs/quarto-search/autocomplete.umd.js"></script>
 <script src="site_libs/quarto-search/fuse.min.js"></script>
@@ -41,11 +40,11 @@ ul.task-list li input[type="checkbox"] {
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
-  "location": "navbar",
+  "location": "sidebar",
   "copy-button": false,
   "collapse-after": 3,
-  "panel-placement": "end",
-  "type": "overlay",
+  "panel-placement": "start",
+  "type": "textbox",
   "limit": 20,
   "language": {
     "search-no-results-text": "No results",
@@ -64,54 +63,16 @@ ul.task-list li input[type="checkbox"] {
 <link rel="stylesheet" href="styles.css">
 </head>
 
-<body class="nav-fixed">
+<body>
 
 <div id="quarto-search-results"></div>
-  <header id="quarto-header" class="headroom fixed-top">
-    <nav class="navbar navbar-expand-lg navbar-dark ">
-      <div class="navbar-container container-fluid">
-      <div class="navbar-brand-container">
-    <a class="navbar-brand" href="./index.html">
-    <span class="navbar-title">Russian elections’04-24</span>
-    </a>
-  </div>
-          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
-  <span class="navbar-toggler-icon"></span>
-</button>
-          <div class="collapse navbar-collapse" id="navbarCollapse">
-            <ul class="navbar-nav navbar-nav-scroll me-auto">
-  <li class="nav-item">
-    <a class="nav-link active" href="./index.html" aria-current="page">
- <span class="menu-text">Article</span></a>
-  </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="./about.html">
- <span class="menu-text">Map</span></a>
-  </li>  
-</ul>
-              <div id="quarto-search" class="" title="Search"></div>
-          </div> <!-- /navcollapse -->
-      </div> <!-- /container-fluid -->
-    </nav>
-</header>
 <!-- content -->
-<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">On this page</h2>
-   
-  <ul>
-  <li><a href="#коротко" id="toc-коротко" class="nav-link active" data-scroll-target="#коротко">Коротко</a></li>
-  <li><a href="#количество-людей-пришедших-на-голосование" id="toc-количество-людей-пришедших-на-голосование" class="nav-link" data-scroll-target="#количество-людей-пришедших-на-голосование">Количество людей пришедших на голосование</a></li>
-  <li><a href="#демографический-состав-голосующих" id="toc-демографический-состав-голосующих" class="nav-link" data-scroll-target="#демографический-состав-голосующих">Демографический состав голосующих</a></li>
-  <li><a href="#динамика-голосования" id="toc-динамика-голосования" class="nav-link" data-scroll-target="#динамика-голосования">Динамика голосования</a></li>
-  </ul>
-</nav>
-    </div>
+    
 <!-- main -->
-<main class="content" id="quarto-document-content">
+<main class="content page-columns page-full column-body" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
@@ -137,97 +98,45 @@ ul.task-list li input[type="checkbox"] {
 
 </header>
 
-<section id="коротко" class="level1">
-<h1>Коротко</h1>
-<p>В 2020 году мне стало интересно, как проголосовала заграница на референдуме по изменению конституции. В результате, родилась <a href="https://rpubs.com/vearlen/obnulis" title="Результаты российского референдума 2020 года">вот такая</a> короткая заметка. В 2024 прошли выборы в России. На основе данных собранных мной по заграничному голосованию в <a href="https://novayagazeta.eu/articles/2024/03/20/vosstanie-relokantov?fbclid=IwAR01A66cysVn84QduPZMTBjP3c1cIEfAVLW_drlLD7OGn7bNYmAMvk7sNck">Новой газете Европа</a> вышла статья по участкам за границей. За что большое спасибо Алесе Соколовой, <a href="https://t.me/research_for_democracy">подписывайтесь на её канал</a>.</p>
-<p>Тут кратко некоторые вещи, заинтересовавшие лично меня в процессе работы над данными, в дополнение к статье.</p>
-<ul>
-<li><p>Выросла ли явка? Мы все видели огромные очереди в избирательные участки, многие люди не попали внутрь. Краткий ответ в абсолютных значениях - нет.</p></li>
-<li><p>Какой “демографический” состав голосующих за рубежом? Почему на всех прошлых выборых за границей результат, за исключением 20-го и 24-го годов, в среднем выше чем официальный в России? В основном за счет военных или территорий контролируемых Россией, как ни странно и за границей есть вбросы.</p></li>
-<li><p>Менялось ли как-то распределение голосующих от года к году и как? Менялось, в 2018 году на выборы пришел очень маленький процент людей голосующих против Путина, в 2024 году таких было сильно больше, а людей за Путина пришло меньше.</p></li>
-</ul>
-</section>
-<section id="количество-людей-пришедших-на-голосование" class="level1">
-<h1>Количество людей пришедших на голосование</h1>
+<section id="summary" class="level1 page-columns page-full">
+<h1>Summary</h1>
 <iframe title="Russian elections, demographic of voters" aria-label="Stacked Bars" id="datawrapper-chart-i58j7" src="https://datawrapper.dwcdn.net/i58j7/3/" scrolling="no" frameborder="0" style="width: 0; min-width: 100% !important; border: none;" height="336" data-external="1"></iframe><script type="text/javascript">!function(){"use strict";window.addEventListener("message",(function(a){if(void 0!==a.data["datawrapper-height"]){var e=document.querySelectorAll("iframe");for(var t in a.data["datawrapper-height"])for(var r=0;r<e.length;r++)if(e[r].contentWindow===a.source){var i=a.data["datawrapper-height"][t]+"px";e[r].style.height=i}}}))}();
 </script>
 <div class="cell">
 
 </div>
-<p>Как видно на <strong>?@fig-total_voters</strong> общее абсолютное количество голосующих меньше чем в 2018 году, по-видимому, основная причина - закрытие участков для голосования.</p>
-<div class="cell">
-
-</div>
-<p>Тем не менее, как и многие я видел огромные очереди в избирательные участки в Вене, <a href="https://youtu.be/JmQw0TTWopU?si=JmhoYO32GIe0qt16">Берлине</a>, <a href="https://www.youtube.com/live/FfY5mVx6Ir8?si=2w4nwVIF3_f40x3a&amp;t=1688">Париже</a>, Лондоне и <a href="https://youtu.be/PdUrk4EEZUk?si=zWqv3t0ERDLsFteK">прочих</a> <a href="https://youtu.be/MMVJ-81B_h0?si=2CYBKrxQgn0TA_Xp">городах</a>. Как изменилась явка на зарубежных участках? На <strong>?@fig-turnout</strong> по оси Х показано изменение явки в 2024 по сравнению с 2018, положительные значения - людей пришло больше 2024, размер точки - общее кол-во людей пришедших на участок.</p>
 <iframe title="Elections of Russian president, 2024" aria-label="Bar Chart" id="datawrapper-chart-vr6gs" src="https://datawrapper.dwcdn.net/vr6gs/4/" scrolling="no" frameborder="0" style="width: 0; min-width: 100% !important; border: none;" height="790" data-external="1"></iframe><script type="text/javascript">!function(){"use strict";window.addEventListener("message",(function(a){if(void 0!==a.data["datawrapper-height"]){var e=document.querySelectorAll("iframe");for(var t in a.data["datawrapper-height"])for(var r=0;r<e.length;r++)if(e[r].contentWindow===a.source){var i=a.data["datawrapper-height"][t]+"px";e[r].style.height=i}}}))}();
 </script>
+<pre><code></code></pre>
 <div class="cell">
 
 </div>
-<div class="cell">
-
-</div>
-<div class="cell">
-
-</div>
-<p>В глаза бросаются пять участков справа: Анкара, Молдова, Бангладеш, Кипр и Египет. В них положительная разница в явке более 500%. Суммарно эти участки дают % всех голосов.</p>
-<p>Пропускная способность в Зальцбурге была 37 человека на одного человека в комисии в час, в Вене 29. Если предположить что скорость в Зальцбурге нормальная, то по количеству проголосовавших людей можно предположить где могли произойти вбросы. На <strong>?@fig-cum_ratio</strong> показаны участки составляющие 60% всех голосующих.</p>
 <iframe title="Countries input in total votes abroad" aria-label="Interactive line chart" id="datawrapper-chart-OywM8" src="https://datawrapper.dwcdn.net/OywM8/4/" scrolling="no" frameborder="0" style="width: 0; min-width: 100% !important; border: none;" height="490" data-external="1"></iframe><script type="text/javascript">!function(){"use strict";window.addEventListener("message",(function(a){if(void 0!==a.data["datawrapper-height"]){var e=document.querySelectorAll("iframe");for(var t in a.data["datawrapper-height"])for(var r=0;r<e.length;r++)if(e[r].contentWindow===a.source){var i=a.data["datawrapper-height"][t]+"px";e[r].style.height=i}}}))}();
 </script>
-<div class="cell">
-
-</div>
-</section>
-<section id="демографический-состав-голосующих" class="level1">
-<h1>Демографический состав голосующих</h1>
-<p>Среди избирателей за рубежом очень много военных частей или контролируемых Россией квазигосударств (Абхазия, Приднестровье), их результат на выборых обычно предсказуемо выше 70%.</p>
-<div class="cell">
-
-</div>
-<div class="cell" data-layout-align="left">
-
-</div>
-<div class="cell">
-
-</div>
-<p>У Важных историй получилось, что процент военных и квазигосударств <a href="https://istories.media/news/2024/03/18/bolee-46-golosov-za-putina-na-zarubezhnikh-territoriyakh-polucheno-v-podkontrolnikh-rossii-stranakh-i-voinskikh-chastyakh/">составляет 46%</a>, у меня вышло в районе 37% в 2024 <strong>?@fig-mil_prop</strong>.</p>
-<div class="cell">
-
-</div>
-</section>
-<section id="динамика-голосования" class="level1">
-<h1>Динамика голосования</h1>
-<p>Рассматривая данные с 2004 года, можно обратить внимание, что в 2012 было довольно много стран где результат Путина был ниже 50%. В 2018 таких стран не было, в 20-ом и 24-ом снова распределение стало более широким <a href="#fig-how_voted_gif">Figure&nbsp;1</a></p>
+<p><a href="#fig-how_voted_gif">Figure&nbsp;1</a></p>
 <div class="cell">
 
 </div>
 <div id="fig-how_voted_gif" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><a href="fig-how_voted_gif"><img src="out/elec_04_24_country.gif" class="figure-img"></a></p>
-<p></p><figcaption class="figure-caption">Figure&nbsp;1: Amount of people vs results for Putin</figcaption><p></p>
+<p><a href="fig-how_voted_gif"><img src="out/elec_04_24_country.gif" width="600" class="figure-img"></a></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;1: Amount of people per country (X) vs results for Putin (Y)</figcaption><p></p>
 </figure>
 </div>
 <div class="cell">
-
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-3-1.png" width="672"></p>
 </div>
-<p>Особенностью этих выборов стало не увеличение явки, она не особо выросла, учитывая закрывшиеся участки, а то что количество про-Путинских избирателей стало меньше, а протестных избирателей пришло больше. Это видно как на общих данных так и на европейских.</p>
+</div>
 <div class="cell">
 <div class="cell-output-display">
 <p><img src="index_files/figure-html/unnamed-chunk-4-1.png" width="672"></p>
 </div>
 </div>
-<div class="cell">
-<div class="cell-output-display">
-<p><img src="index_files/figure-html/unnamed-chunk-5-1.png" width="672"></p>
-</div>
-</div>
-<div class="cell">
-
-</div>
-<p>На выборах 2024 людей поддерживающих Путина пришло меньше чем в 2018, а людей против, здесь учтены все другие кандидаты и порча бюллетеней больше. Забавно, что на Кипре, в Никосии, судя по количеству они подрисовали и протестные голоса, т.к. их количество выросло на 7149 человек.</p>
-<p>Тот факт, что в 2018 не было участков где Путин получил меньше 50% объясняется тем, что на выборы 18-го пришло больше избирателей за Путина и меньше против, по сравнению с 2012 годом.</p>
+<div class="column-screen" style="margin-left:10%;margin-right:10%; width:80%">
 <iframe title="Results of Russian president elections, 2024" aria-label="Map" id="datawrapper-chart-wyiK1" src="https://datawrapper.dwcdn.net/wyiK1/18/" scrolling="no" frameborder="0" style="width: 0; min-width: 100% !important; border: none;" height="564" data-external="1"></iframe><script type="text/javascript">!function(){"use strict";window.addEventListener("message",(function(a){if(void 0!==a.data["datawrapper-height"]){var e=document.querySelectorAll("iframe");for(var t in a.data["datawrapper-height"])for(var r=0;r<e.length;r++)if(e[r].contentWindow===a.source){var i=a.data["datawrapper-height"][t]+"px";e[r].style.height=i}}}))}();
 </script>
+</div>
 
 
 </section>

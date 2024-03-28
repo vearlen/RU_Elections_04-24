@@ -717,7 +717,7 @@ animate(g1,
   start_pause = 1,
   nframes = 100,
   height = 400,
-  width = 400,
+  width = 600,
   units = "px")
 
 
