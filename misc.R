@@ -705,7 +705,7 @@ g1 <- RU04_24_PM %>%
   mutate(region = ifelse(is.na(region),'Asia',region)) %>% 
   ggplot(aes(x=people,y=rat,fill=region))+
   geom_point(size=2.5,shape=21,alpha=0.7)+
-  theme_minimal(base_size = 13)+
+  theme_minimal(base_size = 14)+
   labs(title="How countries voted for Putin",
     subtitle = "year: {frame_time}",
     y = "Putin\'s result , %",

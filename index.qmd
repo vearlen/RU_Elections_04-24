@@ -16,12 +16,20 @@ editor_options:
 ```{=html}
 <span style="font-size:0.9em;">Author: <a href="https://t.me/vearlen">Ilya Tishchenko</a></span><br>
 ```
-In 2024 the results of elections of Russian president was reported as high as ***87%***. Although abroad russians are not punished for calling the war how it shell be named and a ***lot of people from Russia*** flee from prosecution, arrests and ***repression machine*** the result from aborad are - 72%, still. Not only in Russia election prcedure turns into acclamation but the state meticilously control the results of Russians voting abroad to get impressive result, 1.7% of total election voices.
+In 2024 the results of [elections of Russian president](https://www.politico.eu/article/charles-michel-congratulate-vladimir-putin-landslide-win-voting-russia-election/ "EU president congratulates Putin on ‘landslide’ win, Politico") was reported as high as [87%](https://www.politico.eu/article/putin-wins-rigged-russian-election-with-88-of-the-vote-exit-poll/ "Putin ‘wins’ rigged Russian election with 87 percent of the vote, Politico"). Although abroad Russians are not punished for calling the war how it shell be named and a lot of people from Russia flee[^1][^2] away from prosecution, arrests and repression machine[^3][^4] the result from abroad are - 72%, still. Not only in Russia election procedure turns into [acclamation](https://novayagazeta.eu/articles/2024/03/26/unpresidented-en "Unpresidented, Novaya Gazeta Europe") but the state meticulously control the results of Russians voting abroad to get an impressive result from 1.7% of total election voices.
+
+[^1]: [Escape from War: New data puts the number of Russians who have left at more than 800,000 people](https://re-russia.net/en/review/347/)
+
+[^2]: [Russia faces brain drain as thousands flee abroad](https://www.bbc.com/news/world-europe-60697763)
+
+[^3]: [Russia's repression machine goes into overdrive](https://www.lemonde.fr/en/international/article/2023/12/11/russia-s-repression-machine-goes-into-overdrive_6333306_4.html)
+
+[^4]: [With over 1000 political prisoners in Russia, Putin says mass repressions must never be repeated](https://meduza.io/en/news/2023/12/05/with-over-1000-political-prisoners-in-russia-putin-says-mass-repressions-must-never-be-repeated)
 
 While we look at historical data one can see that from 45 till 30% are military or "controlled" votes. How these calculated? All military located pooling stations are included in this label. So without that the genuine result is about 33%. Also, in the last 2024 year there is a clear signs of fake ballots at least injected in Cyprus. Why so?
 
 ```{=html}
-<iframe title="Russian elections, demographics of voters" aria-label="Stacked Bars" id="datawrapper-chart-HaX58" src="https://datawrapper.dwcdn.net/HaX58/7/" scrolling="no" frameborder="0" style="width: 0; min-width: 100% !important; border: none;" height="379" data-external="1"></iframe><script type="text/javascript">!function(){"use strict";window.addEventListener("message",(function(a){if(void 0!==a.data["datawrapper-height"]){var e=document.querySelectorAll("iframe");for(var t in a.data["datawrapper-height"])for(var r=0;r<e.length;r++)if(e[r].contentWindow===a.source){var i=a.data["datawrapper-height"][t]+"px";e[r].style.height=i}}}))}();
+<iframe title="Russian elections, demographic of voters" aria-label="Stacked Bars" id="datawrapper-chart-i58j7" src="https://datawrapper.dwcdn.net/i58j7/9/" scrolling="no" frameborder="0" style="width: 0; min-width: 100% !important; border: none;" height="396" data-external="1"></iframe><script type="text/javascript">!function(){"use strict";window.addEventListener("message",(function(a){if(void 0!==a.data["datawrapper-height"]){var e=document.querySelectorAll("iframe");for(var t in a.data["datawrapper-height"])for(var r=0;r<e.length;r++)if(e[r].contentWindow===a.source){var i=a.data["datawrapper-height"][t]+"px";e[r].style.height=i}}}))}();
 </script>
 ```
 You might have seen in the ***news*** long ques in Europe of people who wanted to vote. In case we look at turnout results a few locations stand out, among them Cyprus with 903% increase in total voters. Among those increase - 36,838 people reportedly have been voting from home at one polling station, while last time in 2018 for the whole country it was only 5,278. Bangladesh (482 to 4058), Egypt (1518 to 4765) with the tremendous increase in votes and Turkey where exit poll observes have been kicked out from the street nearby station are under suspicion as well.
@@ -42,7 +50,7 @@ Though only Cyprus with support of all military presence is enough. Looking at t
 
 In 2012 a lot of people who voted against Putin came to polling stations in comparison to 2008 (+71,912, blue dots below), those numbers were higher than complimentary voters who also increase. In 2018 the critically thinking electorate didn't came (- 48,566) and thus increase of pro-government voters (+76,675) gave that consolidate result in 2018. In 2024 in almost all regions, except Asia, protest voters decided to come and vote against Putin, while supporters remain passive.
 
-However even abroad the state controls the outcome not by fair elections but manipulating with ballots and make sure that military controlled territories express their voices enough, up to 96%. As said this is [acclamation](https://novayagazeta.eu/articles/2024/03/26/unpresidented-en "Unpresidented, Novaya Gazeta Europe"), not election.
+However even abroad the state controls the outcome not by fair elections but manipulating with ballots and make sure that military controlled territories express their voices enough, up to 96%. As said this is acclamation, not election.
 
 ```{=html}
 <iframe title="Russians elections abroad" aria-label="Dot Plot" id="datawrapper-chart-1CeXA" src="https://datawrapper.dwcdn.net/1CeXA/1/" scrolling="no" frameborder="0" style="width: 0; min-width: 100% !important; border: none;" height="699" data-external="1"></iframe><script type="text/javascript">!function(){"use strict";window.addEventListener("message",(function(a){if(void 0!==a.data["datawrapper-height"]){var e=document.querySelectorAll("iframe");for(var t in a.data["datawrapper-height"])for(var r=0;r<e.length;r++)if(e[r].contentWindow===a.source){var i=a.data["datawrapper-height"][t]+"px";e[r].style.height=i}}}))}();
