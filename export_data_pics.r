@@ -167,7 +167,36 @@ df_for_map %>%
   write.csv(paste0('out/df_map_',i,'.csv'),row.names = FALSE)}
 
 
-# export crossplot turnout ------------------------------------------------
+# per region plus minus for and against -----------------------------------
+
+df_all <- df_for_map %>% 
+  select(year,en_country,alpha.2,`_gov_total_diff`,`_ag_rej_total_diff`) %>% 
+  filter(year != 2004) %>% 
+  group_by(year) %>% 
+  summarise(gov_diff = sum(`_gov_total_diff`,na.rm=TRUE),ag_rej_diff = sum(`_ag_rej_total_diff`,na.rm=TRUE)) %>% 
+  mutate(region = "All abroad")
+
+cntr <- read.csv('Data/all_countries.csv',sep = ";") %>% select(alpha.2,region,sub.region)
+
+df_reg <- df_for_map %>% 
+  select(year,en_country,alpha.2,`_gov_total_diff`,`_ag_rej_total_diff`) %>% 
+  filter(year != 2004) %>% 
+  left_join(cntr) %>% 
+  group_by(year,region) %>% 
+  summarise(gov_diff = sum(`_gov_total_diff`,na.rm=TRUE),ag_rej_diff = sum(`_ag_rej_total_diff`,na.rm=TRUE)) 
+
+df_diff_per_years <- bind_rows(df_all,df_reg) %>% 
+  mutate(year_label = case_when(
+    year==2008 ~ '\'04-\'08',
+    year==2012 ~ '\'08-\'12',
+    year==2018 ~ '\'12-\'18',
+    year==2020 ~ '\'18-\'20',
+    year==2024 ~ '\'20-\'24'
+  ))
+df_diff_per_years %>% 
+  filter(!region %in% c("Africa","Oceania")) %>%
+  write.csv('out/df_diff_per_years_region.csv',row.names = FALSE)
+# export crossplot turnout 18-24 ------------------------------------------------
 
 df_18_24 %>% 
   select(en_country,alpha.2,`_total_diff_rat`,`_total_diff`) %>% 
