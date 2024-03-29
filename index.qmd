@@ -5,52 +5,57 @@ execute:
   echo: false 
   warning: false
 subtitle: "How russians vote abroad for Russian president \"elections\""
-author: "Ilya Tishchenko"
 fig-responsive: false
 format:
   html:
     page-layout: full 
+editor_options: 
+  chunk_output_type: console
 ---
 
-In 2024 the results of elections of Russian president was reported as high as 87%[^1] . That is inside Russia where freedom of speech is limited. Abroad the result is 72%.
+```{=html}
+<span style="font-size:0.9em;">Author: <a href="https://t.me/vearlen">Ilya Tishchenko</a></span><br>
+```
+In 2024 the results of elections of Russian president was reported as high as ***87%***. Although abroad russians are not punished for calling the war how it shell be named and a ***lot of people from Russia*** flee from prosecution, arrests and ***repression machine*** the result from aborad are - 72%, still. Not only in Russia election prcedure turns into acclamation but the state meticilously control the results of Russians voting abroad to get impressive result, 1.7% of total election voices.
 
-[^1]: Official results of Russian president elections 2024
-
-Let's look at demographics, who is voting?
-
-Military - all voters at polling stations in military units relative to all voters in country.
+While we look at historical data one can see that from 45 till 30% are military or "controlled" votes. How these calculated? All military located pooling stations are included in this label. So without that the genuine result is about 33%. Also, in the last 2024 year there is a clear signs of fake ballots at least injected in Cyprus. Why so?
 
 ```{=html}
 <iframe title="Russian elections, demographics of voters" aria-label="Stacked Bars" id="datawrapper-chart-HaX58" src="https://datawrapper.dwcdn.net/HaX58/7/" scrolling="no" frameborder="0" style="width: 0; min-width: 100% !important; border: none;" height="379" data-external="1"></iframe><script type="text/javascript">!function(){"use strict";window.addEventListener("message",(function(a){if(void 0!==a.data["datawrapper-height"]){var e=document.querySelectorAll("iframe");for(var t in a.data["datawrapper-height"])for(var r=0;r<e.length;r++)if(e[r].contentWindow===a.source){var i=a.data["datawrapper-height"][t]+"px";e[r].style.height=i}}}))}();
 </script>
 ```
-You might have seen in the news long ques in Europe of people who wanted to vote. What happened with turnout?
+You might have seen in the ***news*** long ques in Europe of people who wanted to vote. In case we look at turnout results a few locations stand out, among them Cyprus with 903% increase in total voters. Among those increase - 36,838 people reportedly have been voting from home at one polling station, while last time in 2018 for the whole country it was only 5,278. Bangladesh (482 to 4058), Egypt (1518 to 4765) with the tremendous increase in votes and Turkey where exit poll observes have been kicked out from the street nearby station are under suspicion as well.
 
 ```{=html}
 <iframe title="Elections of Russian president, 2024" aria-label="Bar Chart" id="datawrapper-chart-vr6gs" src="https://datawrapper.dwcdn.net/vr6gs/4/" scrolling="no" frameborder="0" style="width: 0; min-width: 100% !important; border: none;" height="790" data-external="1"></iframe><script type="text/javascript">!function(){"use strict";window.addEventListener("message",(function(a){if(void 0!==a.data["datawrapper-height"]){var e=document.querySelectorAll("iframe");for(var t in a.data["datawrapper-height"])for(var r=0;r<e.length;r++)if(e[r].contentWindow===a.source){var i=a.data["datawrapper-height"][t]+"px";e[r].style.height=i}}}))}();
 </script>
 ```
-The biggest majority of countries are military or unrecognized states.
+Though only Cyprus with support of all military presence is enough. Looking at the cumulative number of voters indicates that only top four countries, including unrecognized states Abkhazia, Osetia and Pridnestrovian Moldavian Republic gives about 42% of all Russian citizens abroad. Simple recipe is to make sure there you get 94% or more there and your final results are almost known.
 
 ```{=html}
 <iframe title="Countries input in total votes abroad" aria-label="Interactive line chart" id="datawrapper-chart-OywM8" src="https://datawrapper.dwcdn.net/OywM8/4/" scrolling="no" frameborder="0" style="width: 0; min-width: 100% !important; border: none;" height="490" data-external="1"></iframe><script type="text/javascript">!function(){"use strict";window.addEventListener("message",(function(a){if(void 0!==a.data["datawrapper-height"]){var e=document.querySelectorAll("iframe");for(var t in a.data["datawrapper-height"])for(var r=0;r<e.length;r++)if(e[r].contentWindow===a.source){var i=a.data["datawrapper-height"][t]+"px";e[r].style.height=i}}}))}();
 </script>
 ```
-In case we look at dynamics of voting @fig-how_voted_gif
+@fig-how_voted_gif demonstrates dynamic of voting for Russian president from abroad. In 2004 it was almost first elections from abroad and the result was 84%, in 2008 new name appeared on ballots and it go 86%. In 2012 quite a lot of people were not that happy with come back of Putin, you can see it by increase of spread over y axis, some countries results were way below 50%, though in total it's 73%. However in 2018 again all points are moving upwards and there is no single country with result \< 50%, 85% overall. In 2020 the turnout was twice less than in 2018. Finally in 2024 the spread between the countries is clearly increases, overall result is 72%.
 
 [![Amount of people per country (X) vs results for Putin (Y)](out/elec_04_24_country.gif){#fig-how_voted_gif fig-align="center" width="600"}](fig-how_voted_gif)
 
-In 2018 a lot of against voters didn't came.
+In 2012 a lot of people who voted against Putin came to polling stations in comparison to 2008 (+71,912, blue dots below), those numbers were higher than complimentary voters who also increase. In 2018 the critically thinking electorate didn't came (- 48,566) and thus increase of pro-government voters (+76,675) gave that consolidate result in 2018. In 2024 in almost all regions, except Asia, protest voters decided to come and vote against Putin, while supporters remain passive.
+
+However even abroad the state controls the outcome not by fair elections but manipulating with ballots and make sure that military controlled territories express their voices enough, up to 96%. As said this is [acclamation](https://novayagazeta.eu/articles/2024/03/26/unpresidented-en "Unpresidented, Novaya Gazeta Europe"), not election.
 
 ```{=html}
 <iframe title="Russians elections abroad" aria-label="Dot Plot" id="datawrapper-chart-1CeXA" src="https://datawrapper.dwcdn.net/1CeXA/1/" scrolling="no" frameborder="0" style="width: 0; min-width: 100% !important; border: none;" height="699" data-external="1"></iframe><script type="text/javascript">!function(){"use strict";window.addEventListener("message",(function(a){if(void 0!==a.data["datawrapper-height"]){var e=document.querySelectorAll("iframe");for(var t in a.data["datawrapper-height"])for(var r=0;r<e.length;r++)if(e[r].contentWindow===a.source){var i=a.data["datawrapper-height"][t]+"px";e[r].style.height=i}}}))}();
 </script>
 ```
-Here you can have a look at the map. Explain tooltip.
+Tooltip on the map shows results of selected elections. Military ratio when shown (i.e. Military:100%) calculated as following: these are all voters at polling stations in Russian military *units* relative to all voters in the country. Below you can also see change in turnout from previous president elections clustered by group of voters (pro/against).
 
 ```{=html}
 <div class="column-screen" style="margin-left:10%;margin-right:10%; width:80%">
 <iframe title="Results of Russian president elections, 2024" aria-label="Map" id="datawrapper-chart-wyiK1" src="https://datawrapper.dwcdn.net/wyiK1/18/" scrolling="no" frameborder="0" style="width: 0; min-width: 100% !important; border: none;" height="564" data-external="1"></iframe><script type="text/javascript">!function(){"use strict";window.addEventListener("message",(function(a){if(void 0!==a.data["datawrapper-height"]){var e=document.querySelectorAll("iframe");for(var t in a.data["datawrapper-height"])for(var r=0;r<e.length;r++)if(e[r].contentWindow===a.source){var i=a.data["datawrapper-height"][t]+"px";e[r].style.height=i}}}))}();
 </script>
 </div>
+```
+```{=html}
+<span style="font-size:0.9em;">Feedback, questions: <a href="https://t.me/vearlen">Ilya Tishchenko</a></span>
 ```

@@ -11,7 +11,7 @@ format:
     theme: flatly
     css: styles.css
     toc: false
-    fontsize: 1em
-  
+    fontsize: 1.2em
+    mainfont: NotoSerif, serif;
 editor: visual
 

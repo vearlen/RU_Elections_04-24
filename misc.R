@@ -695,27 +695,38 @@ fit <- lm(result~turnout, turnout_results18)
 summary(fit)
 
 # animated plot -------
+RU04_24_PM <-
+  RU04_24 %>% 
+  filter(str_detect(Label,'Пу|Ме|yes')) %>% 
+  group_by(en_country,year,region) %>% 
+  summarise(rat = mean(ratio), people = sum(number))
 
 g1 <- RU04_24_PM %>%
-  ggplot(aes(x=people,y=rat,color=region))+
-  geom_point(alpha = 0.7, size=3)+
-  scale_x_log10()+
-  theme_minimal(base_size = 16)+
-  labs(title = "Year: {frame_time}",
-    y = "votes for Putin, %",
-    x = "Amount of people, log scale",
-    color ="")+
+  mutate(region = ifelse(is.na(region),'Asia',region)) %>% 
+  ggplot(aes(x=people,y=rat,fill=region))+
+  geom_point(size=2.5,shape=21,alpha=0.7)+
+  theme_minimal(base_size = 13)+
+  labs(title="How countries voted for Putin",
+    subtitle = "year: {frame_time}",
+    y = "Putin\'s result , %",
+    x = "Amount of people per country, log scale",
+    fill ="")+
+  labs(fill="")+
+  theme(legend.position = 'top')+
+  scale_x_log10(labels=scales::label_comma())+
+  scale_fill_manual(values = c('#3cab7a','#c71e1d','#fa8c00','#18a1cd','grey'))+
+  guides(fill=guide_legend(nrow=1))+
   transition_time(year)+
   ease_aes('linear')
 
-animate(g1)
+# animate(g1)
 animate(g1,
   renderer = gifski_renderer('out/elec_04_24_country.gif'),
   # renderer = av_renderer('Out/test.avi'),
   fps = 5,
   end_pause = 20,
   start_pause = 1,
-  nframes = 100,
+  nframes = 120,
   height = 400,
   width = 600,
   units = "px")
