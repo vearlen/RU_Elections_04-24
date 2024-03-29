@@ -14,5 +14,6 @@ format:
     fontsize: 1.2em
     mainfont: NotoSerif, serif;
     linkcolor: '#006a9c'
+    fontcolor: '#444'
 editor: visual
 
