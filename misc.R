@@ -1060,7 +1060,7 @@ RU_total_UIK %>%
   pivot_wider(id_cols = c(UIK,en_country),names_from = year,values_from = total) %>% 
   mutate(tot_diff18_24 = `2024`-`2018`, `tot_rat_dif18_24` = round(tot_diff18_24/`2018`*100,0)) %>% 
   left_join(filter(sum_voters,year==2024),by=join_by("UIK")) %>% 
-  left_join(rat_dif18_24,by='UIK') %>% 
+  left_join(rat_dif18_24,by='UIK') #%>% 
   left_join( RU_Pro_flag_upd %>% 
                select(c(UIK,Location,en_country,ru_pro,year)) %>% 
                filter(year==2024),

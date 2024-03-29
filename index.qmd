@@ -65,7 +65,7 @@ In 2024 almost in all regions, except Asia, protest voters decided to come and v
 <br><iframe title="Results of Russian president elections, 2024" aria-label="Map" id="datawrapper-chart-wyiK1" src="https://datawrapper.dwcdn.net/wyiK1/18/" scrolling="no" frameborder="0" style="width: 0; min-width: 100% !important; border: none;" height="564" data-external="1"></iframe><script type="text/javascript">!function(){"use strict";window.addEventListener("message",(function(a){if(void 0!==a.data["datawrapper-height"]){var e=document.querySelectorAll("iframe");for(var t in a.data["datawrapper-height"])for(var r=0;r<e.length;r++)if(e[r].contentWindow===a.source){var i=a.data["datawrapper-height"][t]+"px";e[r].style.height=i}}}))}();
 </script>
 <br>
-<span style="font-size:0.9em;color:#888;">Tooltip on the map shows results of respective elections. Military ratio when shown (i.e. Military:100%) calculated as following: are all voters at polling stations in Russian military units relative to all voters in the country. Below you can also see change in turnout from previous president elections clustered by group of voters (pro/against).</span><br>
-<span style="font-size:0.9em;color:#888;">Feedback, questions: <a href="https://t.me/vearlen">Ilya Tishchenko</a></span>
+<span style="font-size:0.8em;color:#888;font-family:Noto,sans-serif; font-weight:100;">Tooltip on the map shows results of respective elections. Military ratio when shown (i.e. Military:100%) calculated as follows: all voters at polling stations in Russian military units relative to all voters in the country. Below you can also see change in turnout from previous president elections clustered by group of voters (pro/against).<br>
+Feedback, questions: <a href="https://t.me/vearlen">Ilya Tishchenko</a></span>
 </div>
 ```
