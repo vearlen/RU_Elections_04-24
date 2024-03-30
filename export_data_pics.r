@@ -114,7 +114,7 @@ sum_voters_cntr_2 <- sum_voters_cntr_tmp %>%
 # year2 = 2018
 diff_years <- function(year1,year2){
 
-  tmp1 <- sum_voters_cntr_2 %>% 
+tmp1 <- sum_voters_cntr_2 %>% 
   select(year,en_country,alpha.2,total,gov_total,ag_rej_total) %>% 
   filter(year==year1) 
   
@@ -126,6 +126,8 @@ tmp2 <- sum_voters_cntr_2 %>%
 year1_year2_total = paste0('_total_diff')
 year1_year2_gov_total = paste0('_gov_total_diff')
 year1_year2_ag_rej_total = paste0('_ag_rej_total_diff')
+year2_gov_ratio = paste0("prev_gov_rat")
+
 
 year1_year2_total_rat = paste0('_total_diff_rat')
 year1_year2_gov_total_rat = paste0('_gov_total_diff_rat')
@@ -135,13 +137,14 @@ tmp3 <- left_join(tmp1,tmp2,by=join_by(en_country,alpha.2)) %>%
   mutate({{year1_year2_total}} :=  total.x-total.y,
          {{year1_year2_gov_total}} :=  gov_total.x-gov_total.y,
          {{year1_year2_ag_rej_total}} :=  ag_rej_total.x-ag_rej_total.y,
-         
+         {{year2_gov_ratio}} := gov_total.y/total.y,
+         prev_ag_rej_ratio = 1-prev_gov_rat,
          {{year1_year2_total_rat}} := get(!!year1_year2_total)/total.y,
          {{year1_year2_gov_total_rat}} := get(!!year1_year2_gov_total)/total.y,
          {{year1_year2_ag_rej_total_rat}} := get(!!year1_year2_ag_rej_total)/total.y) %>% 
   select(year=year.x,en_country,alpha.2,year1_year2_total,year1_year2_gov_total,
          year1_year2_ag_rej_total,year1_year2_total_rat,year1_year2_gov_total_rat,
-         year1_year2_ag_rej_total_rat)
+         year1_year2_ag_rej_total_rat,year2_gov_ratio,prev_ag_rej_ratio)
 
 }
 
