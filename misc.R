@@ -2,7 +2,7 @@ library(tidyverse)
 library(cowplot)
 library(plotly)
 library("gganimate")
-library('gifski')
+library(gifski)
 # import data -------------------------------------------------------------
 RU04_24 <- read.csv('Data/RU04_24_Russia.csv')
 
