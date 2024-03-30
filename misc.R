@@ -704,8 +704,8 @@ RU04_24_PM <-
 g1 <- RU04_24_PM %>%
   mutate(region = ifelse(is.na(region),'Asia',region)) %>% 
   ggplot(aes(x=people,y=rat,fill=region))+
-  geom_point(size=2.5,shape=21,alpha=0.7)+
-  theme_minimal(base_size = 14)+
+  geom_point(size=10,shape=21,alpha=0.6)+
+  theme_minimal(base_size = 34)+
   labs(title="How countries voted for Putin",
     subtitle = "year: {frame_time}",
     y = "Putin\'s result , %",
@@ -721,14 +721,14 @@ g1 <- RU04_24_PM %>%
 
 # animate(g1)
 animate(g1,
-  renderer = gifski_renderer('out/elec_04_24_country.gif'),
+  renderer = gifski_renderer('out/elec_04_24_country_linkedin.gif'),
   # renderer = av_renderer('Out/test.avi'),
   fps = 5,
   end_pause = 20,
   start_pause = 1,
   nframes = 120,
-  height = 400,
-  width = 600,
+  height = 1080,
+  width = 1920,
   units = "px")
 
 
