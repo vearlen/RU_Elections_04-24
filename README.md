@@ -1,4 +1,4 @@
-# Results of Russian president elections from abroad 2004-2024
+# Results of Russian presidential elections from abroad 2004-2024
 
 Data used for article in [Novaya Gazeta](https://novayagazeta.eu/articles/2024/03/20/vosstanie-relokantov) are in folder `Data/` [RU04_24_Russia.csv](https://github.com/vearlen/RU_Elections_04-24/raw/master/Data/RU04_24_Russia.csv)
 
