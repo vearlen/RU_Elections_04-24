@@ -6,4 +6,4 @@ Data used for article in [Novaya Gazeta](https://novayagazeta.eu/articles/2024/0
 
 -   [Map with overview](https://datawrapper.dwcdn.net/wyiK1/25/)
 
-[![Results of russian presidental elections 2024 from abroad](pics/results-of-russian-president-elections-2024.png)](https://datawrapper.dwcdn.net/wyiK1/25/)
+[![Results of Russian presidential elections 2024 from abroad](pics/results-of-russian-president-elections-2024.png)](https://datawrapper.dwcdn.net/wyiK1/25/)
