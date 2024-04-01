@@ -2,7 +2,7 @@
 
 Data used for article in [Novaya Gazeta](https://novayagazeta.eu/articles/2024/03/20/vosstanie-relokantov) are in folder `Data/` [RU04_24_Russia.csv](https://github.com/vearlen/RU_Elections_04-24/raw/master/Data/RU04_24_Russia.csv)
 
--   [Short summary](https://vearlen.github.io/RU_Elections_04-24/)
+-   [Summary](https://vearlen.github.io/RU_Elections_04-24/)
 
 -   [Map with overview](https://datawrapper.dwcdn.net/wyiK1/25/)
 
