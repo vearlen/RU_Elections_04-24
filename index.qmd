@@ -1,10 +1,10 @@
 ---
-title: "Russian presidental elections from abroad"
+title: "Russian presidential elections from abroad"
 navbar: false
 execute:
   echo: false 
   warning: false
-subtitle: "How russians vote abroad for Russian presidental \"elections\""
+subtitle: "How russians vote abroad for Russian presidential \"elections\""
 fig-responsive: false
 format:
   html:
